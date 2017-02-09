@@ -18,7 +18,7 @@ function main(){
 //     air.pressure.set(10,10,5000);
     
     
-    var loop = setInterval(update, 1000 / FPS);
+    // var loop = setInterval(update, 1000 / FPS);
     window.addEventListener("keydown", function(e){
         if (e.which == 81){ // 'q'
             clearInterval(loop);
@@ -46,7 +46,9 @@ function increasePressure(x, y, amount){
 function update(){
     air.update();
     draw();
+    requestAnimationFrame(update);
 }
+requestAnimationFrame(update);
 
 function draw(){
     air.pressure.forAny(function(value, [x, y]){
