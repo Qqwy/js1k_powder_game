@@ -1,0 +1,44 @@
+I found source code in Powder Toy (PT) that handles the aerodynamics.
+Unfortunately, this code is a bit hard to read (1 or 2 letter variables, variable reuse, not enough comments).
+I tried to extract the principles and write them down
+
+
+There are several air interactions in this game, most of which need to be calculated seperately:
+
+pressure -> pressure
+This is simple diffusion.
+Each cell gets its pressure updated with the weighted average of the pressure of its neigbours.
+PT uses a 3*3 matrix where the center has value 1, the sides have e^-1 and the corners e^-4. This matrix is then normalized so the sum is one.
+The cell multiplies its own pressure with the center cell etc.
+If any of the cells is impenetrable, the pressure at the center is used instead.
+
+velocity -> velocity
+The same matrix is used to compute the velocity vector. In PT this happens in the same for loops as the pressure.
+However, once the velocity vector is found, it looks to the point that is the current location minus this vector. In other words: the (non integer) point where the air for this step came from.
+If one of the places in between is blocked, take the point furthes point that isn't blocked.
+The air velocity at this point is then calculated by taking the weighted average of the 4 surrounding points. The final velocity is the weighted average of the original velocity vector and the new one.
+
+velocity -> pressure
+this influence is obtained by comparing the inflow and outflow.
+PT compares the velocity for 1 neigbouring point per dimension.
+The difference in velocity in this dimension adds to the current in/outflow.
+The total in/outflow, multiplied by some constant, is added to the total pressure.
+
+
+pressure -> velocity
+This is very similar to the previous action: take the difference of pressure of a neighbour per dimension and add that to the velocity. In PT, the neigbours on the other side are used now.
+
+
+intra cell actions
+the pressure and velocity should both slowly decrease each step. Multiply those by a constant just below 1.
+if the cell is blocked, the air velocity should be set to 0 each step.
+
+Order of actions in PT:
+ - reduce pressure/velocity near edges
+ - clear velocity near obstacles
+ - velocity -> pressure effect and pressure loss
+ - pressure -> velocity effect, velocity loss and give blocked cells 0 velocity
+ - pressure -> pressure and velocity -> velocity
+ - test whether the block there is a fan, and adjust speed accordingly
+
+Except for the last, all these steps modify the field directly since they read different kind of values than they modify.
