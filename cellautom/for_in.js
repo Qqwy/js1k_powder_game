@@ -3,7 +3,7 @@
 const WIDTH = 400;
 const HEIGHT = 400;
 const SIZE = WIDTH * HEIGHT;
-const FPS = 60;
+const FPS = 30;
 
 var field = []; // the main field holding all information
 
@@ -26,26 +26,21 @@ for (i=1; i<=WIDTH; i++){
     field[SIZE-i] = 2;
 }
 
-var evenLoop = 1;
 
 function update(){
     
     var updateStart = Date.now();
     
     c.clearRect(0,0,WIDTH , HEIGHT);
-    for (i=0; i<SIZE; i++){
-        if (field[i]){
-            c.fillRect(i%WIDTH,i/WIDTH|0,1,1)
-            if (1 & field[i] ^ evenLoop){;
-                if (field[i]&4 && !(field[i+WIDTH]&2)){
-                    field[i+WIDTH] = field[i]^1;
-                    field[i] = 0;
-                }
-            }
+    for (i in field){
+        i |= 0;
+        c.fillRect(i%WIDTH,i/WIDTH|0,1,1);
+        if (field[i]&4 && !(field[i+WIDTH]&2)){
+            field[i+WIDTH] = field[i]^1;
+            delete field[i];
         }
     }
-    evenLoop ^= 1;
-    console.log(1000/(Date.now()-updateStart));
+    console.log(Date.now()-updateStart);
 //     requestAnimationFrame(update);
 }
 // requestAnimationFrame(update);

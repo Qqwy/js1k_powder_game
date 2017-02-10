@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+</head>
+<!-- easy html page for testing, since the code can just be loaded from the script tag instead of copy/pasted -->
+<body>
+<canvas id="canvas" width="900px" height="600px">
+</canvas>
+<script>
+    window.a = document.getElementById("canvas");
+    window.c = a.getContext("2d");
+</script>
+<script>// src=powdergame.js>
+q=[];r=[];for(i=0;1E4>i;i++)r[i]=[3,16E4*Math.random()|0];for(i=0;400>i;i++)q[16E4+i]=1;setInterval(()=>{c.clearRect(0,0,400,400);for (v of r)[t,u]=v,c.fillRect(u%400,u/400|0,1,1),t&2&&!(q[u+400]&1)&&(q[u+400]=t,q[u]=0,v[1]+=400)},30)
+</script>
+</body>
+</html>
