@@ -37,8 +37,6 @@ for (i=0; i<SAND;i++){
 
 setInterval(()=>{
     
-    // for timing the update costs. remove when minifying
-//     var updateStart = Date.now();
     
     c.clearRect(0,0,WIDTH, HEIGHT);
     
@@ -52,11 +50,13 @@ setInterval(()=>{
         // this is way simpler
         c.fillRect(pos%WIDTH,pos/WIDTH|0,1,1);
         
-        // if this cell has gravity and the cell below is empty
+        // if this cell has gravity
         if (flags & GRAVITY && pos < SIZE){
             // most probably go straight down, but there is a small chance to go left or right
             newPos = pos + WIDTH + (Math.random()*2.4-1.2|0);
+            // if the newPos is not solid, or this cell is fluid and the cell above newPos is not solid
             if(SOLID ^ field[newPos] & SOLID || flags & FLUID && SOLID ^ field[newPos -= WIDTH] & SOLID){
+                // move to newPos
                 field[newPos] = flags;
                 field[pos] = 0;
                 object[1] = newPos;

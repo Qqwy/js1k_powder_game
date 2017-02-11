@@ -19,6 +19,8 @@
 // powdergame
 //v=[],w=[];for(i=0;1E4>i;i++)w[i]=[3,2E5*Math.random()|0],v[500*i]=1;setInterval(()=>{c.clearRect(0,0,500,400);for(t of w)[q,r]=t,c.fillRect(r%500,r/500|0,1,1),q&2&&2E5>r&&(u=500+(2.4*Math.random()-1.2|0),1^v[r+u]&1&&(v[r+u]=q,v[r]=0,t[1]+=u))},30)
 
+//v=[],w=[];for(i=0;1E4>i;i++)w[i]=[7,2E5*Math.random()|0],v[500*i]=1;setInterval(()=>{c.clearRect(0,0,500,400);for(t of w)if([q,r]=t,c.fillRect(r%500,r/500|0,1,1),q&2&&2E5>r&&(u=r+500+(2.4*Math.random()-1.2|0),1^v[u]&1||q&4&&1^v[u-=500]&1))v[u]=q,v[r]=0,t[1]=u},30)
+
 
 // cellmoving
 //b=[];for(i=0;1E4>i;i++)b[16E4*Math.random()|0]=6,400>i&&(b[16E4+i]=2);a=1;setInterval(()=>{c.clearRect(0,0,400,400);for(i=0;16E4>i;i++)b[i]&&(c.fillRect(i%400,i/400|0,1,1),1&b[i]^a&&(b[i]^=1,b[i]&4&&2^b[i+400]&2&&(b[i+400]=b[i],b[i]=0)));a^=1},30);
