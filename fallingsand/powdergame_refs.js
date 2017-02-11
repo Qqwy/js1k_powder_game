@@ -20,41 +20,53 @@ const DENSITY = 48;
 const LOW_DENSITY = 16;
 const MEDIUM_DENSITY = 32;
 const HIGH_DENSITY = 48;
+const FLY = 64;
+const VOLATILE = 128;
+const FLAMMABLE = 256;
+const IGNITE = 512;
 
-const SAND = HIGH_DENSITY | GRAVITY | HIGH_FRICTION;
-const WATER = LOW_DENSITY | GRAVITY | FLUID | LOW_FRICTION;
-
+const SAND = HIGH_DENSITY | GRAVITY | HIGH_FRICTION | FLAMMABLE;
+const WATER = MEDIUM_DENSITY | GRAVITY | FLUID | LOW_FRICTION;
+const FIRE = LOW_DENSITY | FLY | MEDIUM_FRICTION | VOLATILE | IGNITE;
+const STONE = HIGH_DENSITY | GRAVITY;
+const BIRD = LOW_DENSITY | FLY | MEDIUM_FRICTION;
+const NUM_OBJ_TYPES = 5;
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
-var flags, pos, object, newPos;
+var flags, pos, object, newPos, currentType = 0;
 
 var field = []; // the main field holding all information
 
-// a list of all pacticles that can do somehing or are drawn (static invisible walls can be excluded)
 var objects = [];
+// a list of all pacticles that can do somehing or are drawn (static invisible walls can be excluded)
+
+var objectTypes = [SAND, WATER, FIRE, STONE, BIRD];
 
 // this can be simplified to object syntax later
 var colours = [];
 colours[SAND] = "#ba8";
 colours[WATER] = "#22f";
+colours[FIRE] = "#f00";
+colours[STONE] = "#888";
+colours[BIRD] = "#445";
 
-// add some random objects
-for (i=0; i<OBJECTS;i++){
-    // a particle consists of the pair of the binary flags and its position
-    objects[i] = [WATER, Math.random()*SIZE|0];
-    
-    // make vertical wall
-    // it will have the height of OBJECTS instead of HEIGHT, but as long as OBJECTS>HEIGHT that's okay
-    field[i*WIDTH]=HIGH_DENSITY;
-    // the floor can be done with less bytes in the move conditions
-    // if there is only 1 moving down condition
-}
 
 // find better solution for this later
 for (i=SIZE*1.5;i--;){
     field[i] = [];
 }
+
+// add some random objects
+for (i=HEIGHT;i--;){
+    // a particle consists of the pair of the binary flags and its position
+//     objects[i] = [WATER, Math.random()*SIZE|0];
     
+    
+    // make vertical wall
+    field[i*WIDTH] = [HIGH_DENSITY, i*WIDTH];
+    // the floor can be done with less bytes in the move conditions
+    // if there is only 1 moving down condition
+}
 
 // var startTime = Date.now();
 // var totalSteps = 0;
@@ -72,18 +84,31 @@ setInterval(_=>{
     for (object of objects){
         // same as previous line
         [flags, pos] = object;
-        
-        // the drawing is one frame behind on the physics, but I don't think that matters
-        // this is way simpler
-        c.fillStyle = colours[flags];
-        c.fillRect(pos%WIDTH,pos/WIDTH|0,1,1);
-        // most probably go straight down, but there is a small chance to go left or right
-        newPos = pos +
-            WIDTH * (flags & GRAVITY && pos < SIZE) +
-            (Math.random() < (flags & FRICTION)*.3)*(Math.random()>.5?1:-1);
-        
-        // if the newPos has lower density, or this cell is fluid and the cell above newPos has lower density
-        if((field[newPos][0] & DENSITY) < (flags & DENSITY) || flags & FLUID && (field[newPos -= WIDTH][0] & DENSITY) < (flags & DENSITY)){
+        if (flags){
+            // the drawing is one frame behind on the physics, but I don't think that matters
+            // this is way simpler
+            c.fillStyle = colours[flags];
+            c.fillRect(pos%WIDTH,pos/WIDTH|0,1,1);
+            // most probably go straight down, but there is a small chance to go left or right
+            
+            if (flags & VOLATILE && Math.random() < .1){
+                object[0] = 0;
+            }
+            
+            newPos = pos +
+                WIDTH * (!!(flags & GRAVITY)-!!(flags & FLY)) +
+                (Math.random() < (flags & FRICTION)*.3)*(Math.random()>.5?1:-1);
+            
+            
+            // if not the newPos has lower density, or this cell is fluid and the cell above newPos has lower density
+            if(!(newPos<SIZE && newPos>0 && (field[newPos][0] & DENSITY) < (flags & DENSITY) || flags & FLUID && (field[newPos -= WIDTH][0] & DENSITY) < (flags & DENSITY))){
+                newPos = pos;
+            }
+            
+            if (flags & IGNITE && field[newPos+WIDTH][0] & FLAMMABLE){
+                field[newPos+WIDTH][0] = FIRE;
+            }
+            
             // swap place with object at newPos
             field[newPos][1] = pos;
             field[pos] = field[newPos];
@@ -97,4 +122,13 @@ setInterval(_=>{
 },DELAY);
 
 // when the mouse is pressed, create 20 objects under the cursor
-onmousedown = e => {for (i=20; i--;)objects.push([SAND, e.offsetX+e.offsetY*WIDTH])}
+onclick = e => {
+    for (i=20; i--;){
+        objects.push([
+            objectTypes[currentType%NUM_OBJ_TYPES], Math.min(e.offsetX,WIDTH)+Math.min(e.offsetY*WIDTH, SIZE)]);
+    }
+}
+
+// press any key to change type of spawned particle
+onkeydown = _ => currentType++;
+
