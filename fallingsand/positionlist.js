@@ -1,5 +1,5 @@
 
-const WIDTH = 500;
+const WIDTH = 400;
 const HEIGHT = 400;
 const SAND = 10000;
 const SIZE = WIDTH * HEIGHT;
@@ -12,7 +12,7 @@ var flags, pos, object;
 var field = []; // the main field holding all information
 
 // a list of all pacticles that can do somehing or ar drawn (static invisible walls can be excluded)
-var objects = [];
+var positions = [];
 
 
 /*
@@ -24,41 +24,45 @@ var objects = [];
 // add some random sand
 for (i=0; i<SAND;i++){
     // a particle consists of the pair of the binary flags and its position
-    objects[i] = [3, Math.random()*SIZE|0];
+    field[positions[i] = Math.random()*SIZE|0] = 3;
     
-
+    if (i<WIDTH){
+        field[SIZE+i] = 1;
+    }
 }
 
 
-setInterval(()=>{
+// // add a floor below the field
+// for (i=0; i<WIDTH; i++){
+//     field[SIZE+i] = 1;
+// }
+
+
+function update(){
     
     // for timing the update costs. remove when minifying
-//     var updateStart = Date.now();
+    var updateStart = Date.now();
     
     c.clearRect(0,0,WIDTH, HEIGHT);
     
-    // ES6 syntax. closure can only work up to ES5. closure will make a huge workaround
-    // My best solution so far is to manually remove workaround
-    for (object of objects){
-        // same as previous line
-        [flags, pos] = object;
-        
+    for (i in positions){
+        pos = positions[i];
         // the drawing is one frame behind on the physics, but I don't think that matters
         // this is way simpler
         c.fillRect(pos%WIDTH,pos/WIDTH|0,1,1);
         
         // if this cell has gravity and the cell below is empty
-        if (flags & 2 && 1 ^ field[pos + WIDTH] & 1 && pos < SIZE){
+        if ((field[pos] & 2) && 1 ^ field[pos + WIDTH] & 1){
             // move the cell down
-            field[pos + WIDTH] = flags;
+            field[pos + WIDTH] = field[pos];
             field[pos] = 0;
-            object[1] += WIDTH
+            positions[i] += WIDTH
         }
     }
     
     // for timing the update costs. remove when minifying
-//     console.log((Date.now()-updateStart));
+    console.log((Date.now()-updateStart));
 //     requestAnimationFrame(update);
-},30);
+}
 // requestAnimationFrame(update);
-// setInterval(update,1000/FPS);
+setInterval(update,1000/FPS);

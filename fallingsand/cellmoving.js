@@ -3,9 +3,9 @@ const WIDTH = 400;
 const HEIGHT = 400;
 const SAND = 10000;
 const SIZE = WIDTH * HEIGHT;
-const FPS = 60;
+const FPS = 30;
 
-var evenloop;
+var evenLoop;
 
 var field = []; // the main field holding all information
 
@@ -21,20 +21,22 @@ var field = []; // the main field holding all information
 // add some random sand
 for (i=0; i<SAND;i++){
     field[Math.random()*SIZE|0] = 6;
+    if (i<WIDTH){
+        field[SIZE+i] = 2;
+    }
 }
 
 
-// add a floor below the field
-for (i=1; i<=WIDTH; i++){
-    field[SIZE-i] = 2;
-}
+// // add a floor below the field
+// for (i=0; i<WIDTH; i++){
+// }
 
 evenLoop = 1;
 
 function update(){
     
     // for timing the update costs. remove when minifying
-    var updateStart = Date.now();
+//     var updateStart = Date.now();
     
     c.clearRect(0,0,WIDTH , HEIGHT);
     
@@ -50,7 +52,7 @@ function update(){
                 field[i] ^= 1;
                 
                 // move down if possible
-                if (field[i]&4 && !(field[i+WIDTH]&2)){
+                if (field[i]&4 && 2 ^ field[i+WIDTH] & 2){
                     field[i+WIDTH] = field[i];
                     field[i] = 0;
                 }
@@ -61,7 +63,7 @@ function update(){
     evenLoop ^= 1;
     
     // for timing the update costs. remove when minifying
-    console.log((Date.now()-updateStart));
+//     console.log((Date.now()-updateStart));
 //     requestAnimationFrame(update);
 }
 // requestAnimationFrame(update);
