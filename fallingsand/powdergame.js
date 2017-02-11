@@ -5,9 +5,16 @@ const SAND = 10000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 30; // 1000/FPS
 
+// binary flags
+const SOLID = 1; // will probably be replaced by density
+const GRAVITY = 2;
+const FLUID = 4;
+
+const DEFAULT_PARTICLE = SOLID | GRAVITY | FLUID;
+
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
-var flags, pos, object, offset;
+var flags, pos, object, newPos;
 
 var field = []; // the main field holding all information
 
@@ -15,20 +22,14 @@ var field = []; // the main field holding all information
 var objects = [];
 
 
-/*
- * binary flags:
- * 1: solid. Will block other particles trying to enter
- * 2: gravity loaded
- */
-
 // add some random sand
 for (i=0; i<SAND;i++){
     // a particle consists of the pair of the binary flags and its position
-    objects[i] = [3, Math.random()*SIZE|0];
+    objects[i] = [DEFAULT_PARTICLE, Math.random()*SIZE|0];
     
     // make vertical wall
     // it will have the height of SAND instead of HEIGHT, but as long as SAND>HEIGHT that's okay
-    field[i*WIDTH]=1;
+    field[i*WIDTH]=SOLID;
     // the floor can be done with less bytes in the move conditions
     // if there is only 1 moving down condition
 }
@@ -52,12 +53,13 @@ setInterval(()=>{
         c.fillRect(pos%WIDTH,pos/WIDTH|0,1,1);
         
         // if this cell has gravity and the cell below is empty
-        if (flags & 2 && pos < SIZE){
-            offset = Math.random()*2.4-1.2|0;
-            if(1 ^ field[pos + WIDTH + offset] & 1){
-                field[pos + WIDTH + offset] = flags;
+        if (flags & GRAVITY && pos < SIZE){
+            // most probably go straight down, but there is a small chance to go left or right
+            newPos = pos + WIDTH + (Math.random()*2.4-1.2|0);
+            if(SOLID ^ field[newPos] & SOLID || flags & FLUID && SOLID ^ field[newPos -= WIDTH] & SOLID){
+                field[newPos] = flags;
                 field[pos] = 0;
-                object[1] += WIDTH + offset;
+                object[1] = newPos;
             }
         }
     }

@@ -40,6 +40,7 @@ function update(){
     
     c.clearRect(0,0,WIDTH , HEIGHT);
     
+    // a for in loop might save some bytes (and be a bit more efficient the first few frames)
     for (i=0; i<SIZE; i++){
         if (field[i]){
             // a cell might be drawn twice per step, but this is not very bad
