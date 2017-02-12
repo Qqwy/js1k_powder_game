@@ -28,7 +28,7 @@ const IGNITE = 512;
 const SAND = HIGH_DENSITY | GRAVITY | HIGH_FRICTION | FLAMMABLE;
 const WATER = MEDIUM_DENSITY | GRAVITY | FLUID | LOW_FRICTION;
 const FIRE = LOW_DENSITY | FLY | MEDIUM_FRICTION | VOLATILE | IGNITE;
-const STONE = HIGH_DENSITY | GRAVITY;
+const PILLAR = HIGH_DENSITY | GRAVITY;
 const BIRD = LOW_DENSITY | FLY | MEDIUM_FRICTION;
 const NUM_OBJ_TYPES = 5;
 // declaring variables as local allows closure to simplify the names
@@ -40,14 +40,14 @@ var field = []; // the main field holding all information
 var objects = [];
 // a list of all pacticles that can do somehing or are drawn (static invisible walls can be excluded)
 
-var objectTypes = [SAND, WATER, FIRE, STONE, BIRD];
+var objectTypes = [SAND, WATER, FIRE, PILLAR, BIRD];
 
 // this can be simplified to object syntax later
 var colours = [];
 colours[SAND] = "#ba8";
 colours[WATER] = "#22f";
 colours[FIRE] = "#f00";
-colours[STONE] = "#888";
+colours[PILLAR] = "#888";
 colours[BIRD] = "#445";
 
 
@@ -68,8 +68,8 @@ for (i=HEIGHT;i--;){
     // if there is only 1 moving down condition
 }
 
-// var startTime = Date.now();
-// var totalSteps = 0;
+var startTime = Date.now();
+var totalSteps = 0;
 
 // var updateStart = Date.now();
 
@@ -116,7 +116,7 @@ setInterval(_=>{
             object[1] = newPos;
         }
     }
-//     console.log((Date.now()-startTime)/++totalSteps);
+    console.log((Date.now()-startTime)/++totalSteps);
 //     updateStart = Date.now();
     
 },DELAY);

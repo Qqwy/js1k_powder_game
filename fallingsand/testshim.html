@@ -12,7 +12,7 @@
     window.a = document.getElementById("canvas");
     window.c = a.getContext("2d");
 </script>
-<script src="powdergame_refs.js">
+<script src="powdergame_cells.js">
 // objectlist
 //u=[],v=[];for(i=0;1E4>i;i++)v[i]=[3,2E5*Math.random()|0];setInterval(()=>{c.clearRect(0,0,500,400);for(t of v)[q,r]=t,c.fillRect(r%500,r/500|0,1,1),q&2&&1^u[r+500]&1&&2E5>r&&(u[r+500]=q,u[r]=0,t[1]+=500)},30)
 
@@ -23,6 +23,8 @@
 
 // powdergame_refs
 //v=[],w=[],x={57:"#ba8",31:"#22f"};for(i=1E4;i--;)w[i]=[31,2E5*Math.random()|0],v[500*i]=48;for(i=0;3e5>i;i++)v[i]=[];setInterval(_=>{c.clearRect(0,0,500,400);for(t of w)if([q,r]=t,c.fillStyle=x[q],c.fillRect(r%500,r/500|0,1,1),q&8&&2E5>r&&(u=r+500+(Math.random()<.3*(q&3))*(.5<Math.random()?1:-1),(v[u][0]&48)<(q&48)||q&4&&(v[u-=500][0]&48)<(q&48)))v[u][1]=r,v[r]=v[u],v[u]=t,t[1]=u},30);onmousedown=a=>{for(i=20;i--;)w.push([57,a.offsetX+500*a.offsetY])}
+
+// v=0,w=[],x=[],y=[313,47,722,56,82],z={313:"#ba8",47:"#22f",722:"#f00",56:"#888",82:"#445"};for(i=3E5;i--;)w[i]=[];for(i=400;i--;)w[500*i]=[48,500*i];setInterval(a=>{c.clearRect(0,0,500,400);for(t of x)[q,r]=t,q&&(c.fillStyle=z[q],c.fillRect(r%500,r/500|0,1,1),q&128&&.1>Math.random()&&(t[0]=0),u=r+500*(!!(q&8)-!!(q&64))+(Math.random()<.3*(q&3))*(.5<Math.random()?1:-1),2E5>u&&0<u&&(w[u][0]&48)<(q&48)||q&4&&(w[u-=500][0]&48)<(q&48)||(u=r),q&512&&w[u+500][0]&256&&(w[u+500][0]=722),w[u][1]=r,w[r]=w[u],w[u]=t,t[1]=u)},30);onclick=a=>{for(i=20;i--;)x.push([y[v%5],Math.min(a.offsetX,500)+Math.min(500*a.offsetY,2E5)])};onkeydown=a=>v++
 
 
 // cellmoving
