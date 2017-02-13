@@ -124,29 +124,7 @@
       var TOKEN_RELOAD_ONORIENTATIONCHANGE = true;
     </script>
     <script type="demo">
-      // THIS IS WHERE YOUR DEMO GOES
-     document.write('see console');
-     console.log('demo here', window.a, b, window.c, window.g, window.d);
-     c.globalAlpha = 0.1;
-     
-     console.log(a, b, c);
-     id = c.createImageData(a.width, a.height);
-     idd = id.data;
-     c.fillRect(10, 10, 100, 500);
-
-     fun = function(){
-     for (var i = 0; i < idd.length; i += 4) {
-         idd[i+0] /= 2;
-          idd[i + 0] += (i / idd.length) * 55;
-         idd[i + 3] = 255;
-     }
-
-     c.putImageData(id, 0, 0);
-
-     c.fillRect(10, 10, 100, 500);
-     }
-     window.setInterval(fun, 1);
-      // END
+     f=0,g=4,k=new Uint32Array(54E4),l=[1090912489,524475,272661603,224,132211,948072681,956436704,805309922,262889],m=[];m[1090912493]=8956603;m[262893]=7838139;m[524479]=16720418;m[272661607]=255;m[228]=8947848;m[132215]=26112;m[805309926]=43520;m[948072685]=6728294;m[956436708]=34969;var n=new ArrayBuffer(216E4),p=new Uint32Array(n),q=new Uint8ClampedArray(n);for(i=600;i--;)k[900*i]=192;onmousedown=function(h){for(i=50;i--;)k[h.offsetX+900*h.offsetY+i]=k[h.offsetX+900*h.offsetY-i]=k[h.offsetX+900*(h.offsetY+i)]=k[h.offsetX+900*(h.offsetY-i)]=l[f%6]};onkeydown=function(){return f++};e=function(){p.fill(4278190080);for(b=54E4;b--;)a=k[b],a&32&&4&a^g&&(p[b]|=m[a|4],a&2048&&.1>Math.random()&&(a=0),a&4096&&k[b-900]&4063232&a>>5&&(k[b-900]=l[a>>27]^g),a&16384&&k[b+900]&4063232&a>>5&&(k[b+900]=l[a>>27]^g),a&8192&&(k[b+1]&4063232&a>>5&&(k[b+1]=l[a>>27]^g),k[b-1]&4063232&a>>5&&(k[b-1]=l[a>>27]^g)),d=b+900*(!!(a&8)-!!(a&1024))*(!(a&512)||.5<Math.random())+(Math.random()<.3*(a&3))*(.5<Math.random()?1:-1),54E4>d&&0<d&&(k[d]&192)<(a&192)||a&16&&(k[d=d%900+900*(b/900|0)]&192)<(a&192)||(d=b),k[d]&4063232&a>>5&&(a=l[a>>27]^g),k[b]=a&256?l[a>>27]^g:k[d],k[d]=a^4);imgData=new ImageData(q,900,600);c.putImageData(imgData,0,0);g^=4;requestAnimationFrame(e)};e()
     </script>
     <script>
       (function(){var doc=document;var header=doc.getElementsByTagName("header")[0];var firstChild=header.firstChild;var p=doc.getElementsByClassName("p")[0];

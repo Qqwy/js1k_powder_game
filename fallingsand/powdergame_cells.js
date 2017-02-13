@@ -85,7 +85,7 @@ var particleTypes = [SAND, WATER, FIRE, PILLAR, GAS, SEED, // placable
     WOOD, TREE, MUD]; // not placable
 
 var colours = [];
-// aaBBGGRR
+// BBGGRR
 colours[SAND|UPDATE_BIT] = 0x88aabb;
 colours[MUD|UPDATE_BIT] = 0x7799bb;
 colours[WATER|UPDATE_BIT] = 0xff2222;
