@@ -40,7 +40,7 @@ const REACT_NEIGHBOURS = REACT_ABOVE | REACT_SIDE | REACT_BELOW;
 const PRODUCT_SHIFT = 27;
 
 // those numbers refer to the index in particleTypes array
-const NUM_PLACABLE_TYPES = 7;
+const NUM_PLACABLE_TYPES = 8;
 const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
 const FIRE_PLACE = 3;
 const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
@@ -73,6 +73,7 @@ const GAS = VISIBLE | LOW_DENSITY | FLY | LOW_VISCOSITY | FLAMMABLE | FLUID;
 const SEED = VISIBLE | HIGH_DENSITY | GRAVITY | HIGH_VISCOSITY | FLAMMABLE | NEED_SOIL | REACT_NEIGHBOURS | (TREE_PLACE << PRODUCT_SHIFT);
 const TREE = VISIBLE | HIGH_DENSITY | FLY | MEDIUM_VISCOSITY | TRAIL | VOLATILE | (WOOD_PLACE << PRODUCT_SHIFT);
 const WOOD = VISIBLE | HIGH_DENSITY | NEED_WATERING | REACT_ABOVE | FLAMMABLE | (TREE_PLACE << PRODUCT_SHIFT);
+const MAGMA = VISIBLE | HIGH_DENSITY | GRAVITY | HIGH_VISCOSITY | IGNITE | REACT_NEIGHBOURS | (FIRE_PLACE << PRODUCT_SHIFT) | NEED_WATERING;
 
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
@@ -82,11 +83,11 @@ var evenLoop = UPDATE_BIT;
 
 var field = new Uint32Array(SIZE); // the main field holding all information
 
-var particleTypes = [SAND, WATER, OIL, FIRE, PILLAR, GAS, SEED, // placable
+var particleTypes = [SAND, WATER, OIL, FIRE, PILLAR, GAS, SEED, MAGMA, // placable
     WOOD, TREE, MUD]; // not placable
 
 var colours = [];
-// aaBBGGRR
+// new: rgb. old: aaBBGGRR
 colours[SAND|UPDATE_BIT] = 'ba8';//0x88aabb;
 colours[MUD|UPDATE_BIT] = '975';//0x7799bb;
 colours[WATER|UPDATE_BIT] = '27f';//0xff2222;
@@ -97,6 +98,7 @@ colours[GAS| UPDATE_BIT] = '060';//0x006600;
 colours[TREE| UPDATE_BIT] = '0a0';//0x00aa00;
 colours[SEED | UPDATE_BIT] = '6a6';//0x66aa66;
 colours[WOOD | UPDATE_BIT] = '980';//0x008899;
+colours[MAGMA | UPDATE_BIT] = 'f40';
 
 var drawData = new ArrayBuffer(SIZE*4);
 var pixel32Array = new Uint32Array(drawData)
