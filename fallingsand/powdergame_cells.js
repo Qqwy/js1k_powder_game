@@ -130,7 +130,7 @@ onmousemove = e => (mx = e.offsetX) && (my = e.offsetY)
 
 
 // press any key to change type of spawned particle
-onkeydown = _ => currentType++;
+onkeydown = _ => ++currentType
 
 // var startTime = Date.now();
 // var totalSteps = 0;
@@ -144,7 +144,7 @@ update = _ => {
     for (y=9;md && --y>-9;)
         for (x=9;--x>-9;)
             if (x*x+y*y < 81)
-                field[mx+x+(my+y)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES ] ^ evenLoop ^ UPDATE_BIT
+                field[mx+x+(my+y)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES] ^ evenLoop ^ UPDATE_BIT
     
     // var updateStart = Date.now();
     
@@ -210,6 +210,14 @@ update = _ => {
     
     imgData = new ImageData(imgDataArray, WIDTH, HEIGHT);
     c.putImageData(imgData,0,0);
+    
+    for (i=NUM_PLACABLE_TYPES;i--;)
+    {
+            c.fillStyle = 'rgb('+ (colours[particleTypes[i]|UPDATE_BIT] & 0xff) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff00) >> 8) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff0000) >> 16) +')';
+        c.fillRect(i*16+9, 9, 9, 9);
+        if(i == currentType%NUM_PLACABLE_TYPES)
+            c.fillRect(i*16+9, 20, 9, 2);
+    }
     
     // toggle update bit of update
     evenLoop ^= UPDATE_BIT;
