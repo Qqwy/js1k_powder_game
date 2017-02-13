@@ -88,7 +88,7 @@ var particleTypes = [SAND, WATER, OIL, FIRE, PILLAR, GAS, SEED, // placable
 var colours = [];
 // aaBBGGRR
 colours[SAND|UPDATE_BIT] = 'ba8';//0x88aabb;
-colours[MUD|UPDATE_BIT] = 'b97';//0x7799bb;
+colours[MUD|UPDATE_BIT] = '975';//0x7799bb;
 colours[WATER|UPDATE_BIT] = '27f';//0xff2222;
 colours[OIL|UPDATE_BIT] = '733';//0x333377;
 colours[FIRE|UPDATE_BIT] = 'f00';//0x0000ff;
