@@ -5,7 +5,7 @@ const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 15; // 1000/FPS
 
-const DROP_SIZE = 50;
+const DROP_SIZE = 5;
 
 
 // binary flags
@@ -110,14 +110,20 @@ for (i=HEIGHT;i--;){
 
 
 // when the mouse is pressed, create 20 objects under the cursor
-onmousedown = e => {
-    for (i=DROP_SIZE;i--;){
-        field[e.offsetX+e.offsetY*WIDTH+i] =
-        field[e.offsetX+e.offsetY*WIDTH-i] =
-        field[e.offsetX+(e.offsetY+i)*WIDTH] =
-        field[e.offsetX+(e.offsetY-i)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES];
-    }
-}
+// onmousedown = e => {
+//     for (i=DROP_SIZE;i--;){
+//         field[e.offsetX+e.offsetY*WIDTH+i] =
+//         field[e.offsetX+e.offsetY*WIDTH-i] =
+//         field[e.offsetX+(e.offsetY+i)*WIDTH] =
+//         field[e.offsetX+(e.offsetY-i)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES];
+//     }
+// }
+md = 0
+mx = my = -1
+onmousedown = _ => ++md
+onmouseup   = _ => --md
+onmousemove = e => (mx = e.offsetX) && (my = e.offsetY)
+
 
 
 
@@ -127,8 +133,18 @@ onkeydown = _ => currentType++;
 // var startTime = Date.now();
 // var totalSteps = 0;
 update = _ => {
+    // for (i=DROP_SIZE;md && i--;){
+    //     field[mx+my*WIDTH+i] =
+    //     field[mx+my*WIDTH-i] =
+    //     field[mx+(my+i)*WIDTH] =
+    //     field[mx+(my-i)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES];
+    // }
+    for (y=50;md && --y>-50;)
+        for (x=50;--x>-50;)
+            if (x*x+y*y < 250)
+              field[mx+x+(my+y)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES]
     
-//     var updateStart = Date.now();
+    var updateStart = Date.now();
     
     pixel32Array.fill(0xff000000);
     
@@ -196,7 +212,7 @@ update = _ => {
     // toggle update bit of update
     evenLoop ^= UPDATE_BIT;
     
-//     console.log((Date.now()-updateStart));//-startTime)/++totalSteps);;
+    console.log((Date.now()-updateStart));//-startTime)/++totalSteps);;
     
     requestAnimationFrame(update);
 }//,DELAY);
