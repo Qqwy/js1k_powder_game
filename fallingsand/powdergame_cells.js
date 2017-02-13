@@ -1,6 +1,6 @@
 
-const WIDTH = 900;
-const HEIGHT = 600;
+const WIDTH = 500;
+const HEIGHT = 400;
 const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 15; // 1000/FPS
@@ -40,9 +40,9 @@ const REACT_NEIGHBOURS = REACT_ABOVE | REACT_SIDE | REACT_BELOW;
 const PRODUCT_SHIFT = 27;
 
 // those numbers refer to the index in particleTypes array
-const NUM_PLACABLE_TYPES = 6;
+const NUM_PLACABLE_TYPES = 7;
 const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
-const FIRE_PLACE = 2;
+const FIRE_PLACE = 3;
 const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
 const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
 
@@ -66,6 +66,7 @@ const WATERING = 1 << REAGENT_SHIFT + 2;
 const SAND = VISIBLE | HIGH_DENSITY | GRAVITY | HIGH_VISCOSITY | FLAMMABLE | SOIL | NEED_WATERING | (MUD_PLACE << PRODUCT_SHIFT);
 const MUD = VISIBLE | HIGH_DENSITY | GRAVITY | HIGH_VISCOSITY | SOIL | SLOW;
 const WATER = VISIBLE | MEDIUM_DENSITY | GRAVITY | FLUID | LOW_VISCOSITY | WATERING;
+const OIL = VISIBLE | LOW_DENSITY | GRAVITY | FLUID | LOW_VISCOSITY | FLAMMABLE;
 const FIRE = VISIBLE | LOW_DENSITY | FLY | LOW_VISCOSITY | VOLATILE | IGNITE | REACT_NEIGHBOURS | (FIRE_PLACE << PRODUCT_SHIFT);
 const PILLAR = VISIBLE | HIGH_DENSITY;
 const GAS = VISIBLE | LOW_DENSITY | FLY | LOW_VISCOSITY | FLAMMABLE | FLUID;
@@ -81,7 +82,7 @@ var evenLoop = UPDATE_BIT;
 
 var field = new Uint32Array(SIZE); // the main field holding all information
 
-var particleTypes = [SAND, WATER, FIRE, PILLAR, GAS, SEED, // placable
+var particleTypes = [SAND, WATER, OIL, FIRE, PILLAR, GAS, SEED, // placable
     WOOD, TREE, MUD]; // not placable
 
 var colours = [];
@@ -89,6 +90,7 @@ var colours = [];
 colours[SAND|UPDATE_BIT] = 0x88aabb;
 colours[MUD|UPDATE_BIT] = 0x7799bb;
 colours[WATER|UPDATE_BIT] = 0xff2222;
+colours[OIL|UPDATE_BIT] = 0x333377;
 colours[FIRE|UPDATE_BIT] = 0x0000ff;
 colours[PILLAR| UPDATE_BIT] = 0x888888;
 colours[GAS| UPDATE_BIT] = 0x006600;
@@ -118,8 +120,8 @@ for (i=HEIGHT;i--;){
 //         field[e.offsetX+(e.offsetY-i)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES];
 //     }
 // }
-md = 0
-mx = my = -1
+var md = 0
+var mx = my = -1
 onmousedown = _ => ++md
 onmouseup   = _ => --md
 onmousemove = e => (mx = e.offsetX) && (my = e.offsetY)
@@ -139,12 +141,12 @@ update = _ => {
     //     field[mx+(my+i)*WIDTH] =
     //     field[mx+(my-i)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES];
     // }
-    for (y=50;md && --y>-50;)
-        for (x=50;--x>-50;)
-            if (x*x+y*y < 250)
-              field[mx+x+(my+y)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES]
+    for (y=9;md && --y>-9;)
+        for (x=9;--x>-9;)
+            if (x*x+y*y < 81)
+                field[mx+x+(my+y)*WIDTH] = particleTypes[currentType%NUM_PLACABLE_TYPES ] ^ evenLoop ^ UPDATE_BIT
     
-    var updateStart = Date.now();
+    // var updateStart = Date.now();
     
     pixel32Array.fill(0xff000000);
     
@@ -181,7 +183,7 @@ update = _ => {
             // most probably go straight down, but there is a small chance to go left or right
             newPos = pos +
                 WIDTH*(!!(flags & GRAVITY) - !!(flags & FLY)) * (!(flags&SLOW) || Math.random()>.5) +
-                (Math.random() < (flags & VISCOSITY)*.3)*(Math.random()>.5?1:-1);
+                (Math.random() < (flags & VISCOSITY)*.6)*(Math.random()>.5?1:-1);
             
             
             // if the newPos is not solid, or this cell is fluid and the cell above newPos is not solid
@@ -212,7 +214,7 @@ update = _ => {
     // toggle update bit of update
     evenLoop ^= UPDATE_BIT;
     
-    console.log((Date.now()-updateStart));//-startTime)/++totalSteps);;
+    // console.log((Date.now()-updateStart));//-startTime)/++totalSteps);;
     
     requestAnimationFrame(update);
 }//,DELAY);
