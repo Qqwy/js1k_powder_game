@@ -1,6 +1,6 @@
 
-const WIDTH = 500;
-const HEIGHT = 400;
+const WIDTH = 900;
+const HEIGHT = 600;
 const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 15; // 1000/FPS
@@ -183,7 +183,7 @@ update = _ => {
             // most probably go straight down, but there is a small chance to go left or right
             newPos = pos +
                 WIDTH*(!!(flags & GRAVITY) - !!(flags & FLY)) * (!(flags&SLOW) || Math.random()>.5) +
-                (Math.random() < (flags & VISCOSITY)*.6)*(Math.random()>.5?1:-1);
+                (Math.random() < (flags & VISCOSITY)*1.3)*(Math.random()>.5?1:-1);
             
             
             // if the newPos is not solid, or this cell is fluid and the cell above newPos is not solid
