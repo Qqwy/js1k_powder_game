@@ -122,19 +122,19 @@ for (i=HEIGHT;i--;){
 // }
 var md = 0
 var mx = my = -1
-onmousedown = _ => ++md
-onmouseup   = _ => --md
+onmousedown = e => ++md
+onmouseup   = e => --md
 onmousemove = e => (mx = e.offsetX) && (my = e.offsetY)
 
 
 
 
 // press any key to change type of spawned particle
-onkeydown = _ => ++currentType
+onkeydown = e => ++currentType
 
 // var startTime = Date.now();
 // var totalSteps = 0;
-update = _ => {
+update = e => {
     // for (i=DROP_SIZE;md && i--;){
     //     field[mx+my*WIDTH+i] =
     //     field[mx+my*WIDTH-i] =
@@ -214,9 +214,9 @@ update = _ => {
     for (i=NUM_PLACABLE_TYPES;i--;)
     {
             c.fillStyle = 'rgb('+ (colours[particleTypes[i]|UPDATE_BIT] & 0xff) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff00) >> 8) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff0000) >> 16) +')';
-        c.fillRect(i*16+9, 9, 9, 9);
-        if(i == currentType%NUM_PLACABLE_TYPES)
-            c.fillRect(i*16+9, 20, 9, 2);
+        c.fillRect(i*16+9, i==currentType%NUM_PLACABLE_TYPES ? 16 : 9, 9, 9);
+        // if(i == currentType%NUM_PLACABLE_TYPES)
+            // c.fillRect(i*16+9, 20, 9, 2);
     }
     
     // toggle update bit of update
