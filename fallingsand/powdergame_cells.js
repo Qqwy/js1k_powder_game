@@ -87,28 +87,28 @@ var particleTypes = [SAND, WATER, OIL, FIRE, PILLAR, GAS, SEED, // placable
 
 var colours = [];
 // aaBBGGRR
-colours[SAND|UPDATE_BIT] = 0x88aabb;
-colours[MUD|UPDATE_BIT] = 0x7799bb;
-colours[WATER|UPDATE_BIT] = 0xff2222;
-colours[OIL|UPDATE_BIT] = 0x333377;
-colours[FIRE|UPDATE_BIT] = 0x0000ff;
-colours[PILLAR| UPDATE_BIT] = 0x888888;
-colours[GAS| UPDATE_BIT] = 0x006600;
-colours[TREE| UPDATE_BIT] = 0x00aa00;
-colours[SEED | UPDATE_BIT] = 0x66aa66;
-colours[WOOD | UPDATE_BIT] = 0x008899;
+colours[SAND|UPDATE_BIT] = 'ba8';//0x88aabb;
+colours[MUD|UPDATE_BIT] = 'b97';//0x7799bb;
+colours[WATER|UPDATE_BIT] = '27f';//0xff2222;
+colours[OIL|UPDATE_BIT] = '733';//0x333377;
+colours[FIRE|UPDATE_BIT] = 'f00';//0x0000ff;
+colours[PILLAR| UPDATE_BIT] = '888';//0x888888;
+colours[GAS| UPDATE_BIT] = '060';//0x006600;
+colours[TREE| UPDATE_BIT] = '0a0';//0x00aa00;
+colours[SEED | UPDATE_BIT] = '6a6';//0x66aa66;
+colours[WOOD | UPDATE_BIT] = '980';//0x008899;
 
 var drawData = new ArrayBuffer(SIZE*4);
 var pixel32Array = new Uint32Array(drawData)
 var imgDataArray = new Uint8ClampedArray(drawData);
 
-for (i=HEIGHT;i--;){
+// for (i=HEIGHT;i--;){
     
     // make vertical wall
-    field[i*WIDTH]=HIGH_DENSITY;
+    // field[i*WIDTH]=HIGH_DENSITY;
     // the floor can be done with less bytes in the move conditions
     // if there is only 1 moving down condition
-}
+// }
 
 
 // when the mouse is pressed, create 20 objects under the cursor
@@ -156,8 +156,9 @@ update = e => {
             
             // the drawing is one frame behind on the physics, but I don't think that matters
             // this is way simpler
-            pixel32Array[pos] |= colours[flags|UPDATE_BIT];
-            
+            // pixel32Array[pos] |= colours[flags|UPDATE_BIT];
+            for (i=3;i--;)
+                imgDataArray[pos*4+i]="0x"+colours[flags|UPDATE_BIT][i]+colours[flags|UPDATE_BIT][i]|0;
             
             if (flags & VOLATILE && Math.random() < .1){
                 flags = 0;
@@ -213,7 +214,8 @@ update = e => {
     
     for (i=NUM_PLACABLE_TYPES;i--;)
     {
-            c.fillStyle = 'rgb('+ (colours[particleTypes[i]|UPDATE_BIT] & 0xff) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff00) >> 8) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff0000) >> 16) +')';
+            // c.fillStyle = 'rgb('+ (colours[particleTypes[i]|UPDATE_BIT] & 0xff) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff00) >> 8) +','+ ((colours[particleTypes[i]|UPDATE_BIT] & 0xff0000) >> 16) +')';
+        c.fillStyle = '#'+colours[particleTypes[i]|UPDATE_BIT];
         c.fillRect(i*16+9, i==currentType%NUM_PLACABLE_TYPES ? 16 : 9, 9, 9);
         // if(i == currentType%NUM_PLACABLE_TYPES)
             // c.fillRect(i*16+9, 20, 9, 2);
