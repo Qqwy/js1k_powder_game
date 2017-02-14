@@ -1,6 +1,6 @@
 
-const WIDTH = 900;
-const HEIGHT = 600;
+const WIDTH = 800;
+const HEIGHT = 500;
 const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
@@ -30,63 +30,85 @@ const HIGH_DENSITY = 192;
 const VOLATILE = 32;
 const SLOW = 16;
 const FLY = SLOW;
-const TRAIL = 256;
-const REACT_ABOVE = 1<<12;
-const REACT_SIDE = 1<<13;
-const REACT_BELOW = 1<<14;
+// const TRAIL = 256;
+const REACT_ABOVE = 1<<9;
+const REACT_SIDE = 1<<10;
+const REACT_BELOW = 1<<10;
 const REACT_NEIGHBOURS = REACT_ABOVE | REACT_SIDE | REACT_BELOW;
+
+
+
 
 // afther the PRODUCT_SHIFTth bit, the key for the product starts
 // the PRODUCT number is the index of that type in the particleTypes array
-const PRODUCT_SHIFT = 27;
+// const PRODUCT_SHIFT = 22;
 
 // those numbers refer to the index in particleTypes array
 const NUM_PLACABLE_TYPES = 10;
 const FIRE_PLACE = 2;
+const BLOCK_PLACE = 4
 const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
 const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
 const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
 
 
 
-const REACTING_SHIFT = 22;
-const REACTING = (1<<PRODUCT_SHIFT) - (1<<REACTING_SHIFT);
-const IGNITE = 1 << REACTING_SHIFT + 0;
-const NEED_SOIL = 2 << REACTING_SHIFT + 0;
-const NEED_WATERING = 3 << REACTING_SHIFT + 0;
-
-const REAGENT_SHIFT = 17;
-const REAGENT = (1 << REACTING_SHIFT) - (1<<REAGENT_SHIFT);
-const FLAMMABLE = 1 << REAGENT_SHIFT + 0;
-const SOIL = 1 << REAGENT_SHIFT + 1;
-const WATERING = 1 << REAGENT_SHIFT + 2;
+// const REACTING_SHIFT = 19;
+// const REACTING = (1<<PRODUCT_SHIFT) - (1<<REACTING_SHIFT);
+// const IGNITE = 1 << REACTING_SHIFT;
+// const NEED_SOIL = 2 << REACTING_SHIFT;
+// const NEED_WATERING = 3 << REACTING_SHIFT;
 
 
+const REAGENT_SHIFT = 10;
+const FLAMMABLE = 1;
+const SOIL = 2;
+const WATERING = 3;
+const PERFORABLE = 4;
+
+const REACT_AS = 1<<REAGENT_SHIFT;
+
+
+const REACTING1_SHIFT = 18;
+const REACT1 = REACTING1_SHIFT;
+const PRODUCT1_SHIFT = 21;
+const REACTING1 = (1<<PRODUCT1_SHIFT) - (1<<REACTING1_SHIFT);
+
+const REACTING2_SHIFT = 25;
+const REACT2 = REACTING2_SHIFT;
+const PRODUCT2_SHIFT = 28;
+const REACTING2 = (1<<PRODUCT2_SHIFT) - (1<<REACTING2_SHIFT);
+
+
+
+
+// const REACTS2 = 
 
 // particle types
-const EMPTY = 0; // trees need to grow through empty so this might not be 0 later
+const EMPTY = REACT_AS << PERFORABLE; // trees need to grow through empty so this might not be 0 later
 
-const SAND = HIGH_DENSITY | GRAVITY | LOW_SPREAD | FLAMMABLE | SOIL | NEED_WATERING | (MUD_PLACE << PRODUCT_SHIFT);
-const MUD = HIGH_DENSITY | GRAVITY | LOW_SPREAD | SOIL | SLOW;
-const WATER = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | WATERING;
-const OIL = LOW_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | FLAMMABLE;
-const FIRE = LOW_DENSITY | FLY | HIGH_SPREAD | VOLATILE | IGNITE | REACT_NEIGHBOURS | (FIRE_PLACE << PRODUCT_SHIFT);
+const SAND = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << FLAMMABLE) | (REACT_AS << SOIL) | (WATERING << REACT2) | (MUD_PLACE << PRODUCT2_SHIFT);
+const MUD = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << SOIL) | SLOW;
+const WATER = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | (REACT_AS << WATERING) | (REACT_AS << PERFORABLE);
+const OIL = LOW_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | (REACT_AS << FLAMMABLE);
+const FIRE = LOW_DENSITY | FLY | HIGH_SPREAD | VOLATILE | (FLAMMABLE << REACT1) | REACT_NEIGHBOURS | (FIRE_PLACE << PRODUCT1_SHIFT);
 const BLOCK = HIGH_DENSITY;
-const GAS = LOW_DENSITY | FLY | HIGH_SPREAD | FLAMMABLE | FLUID;
-const SEED = HIGH_DENSITY | GRAVITY | LOW_SPREAD | FLAMMABLE | NEED_SOIL | REACT_NEIGHBOURS | (TREE_PLACE << PRODUCT_SHIFT);
-const TREE = HIGH_DENSITY | FLY | MEDIUM_SPREAD | TRAIL | VOLATILE | (WOOD_PLACE << PRODUCT_SHIFT);
-const WOOD = HIGH_DENSITY | NEED_WATERING | REACT_ABOVE | FLAMMABLE | (TREE_PLACE << PRODUCT_SHIFT);
+const GAS = LOW_DENSITY | FLY | HIGH_SPREAD | (REACT_AS << FLAMMABLE) | FLUID;
+const SEED = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << FLAMMABLE) | (SOIL << REACT2) | REACT_NEIGHBOURS | (TREE_PLACE << PRODUCT2_SHIFT);
+const TREE = HIGH_DENSITY | FLY | MEDIUM_SPREAD | VOLATILE | (PERFORABLE << REACT1) | (WOOD_PLACE << PRODUCT1_SHIFT);
+const WOOD = HIGH_DENSITY | (WATERING << REACT2) | REACT_ABOVE | (REACT_AS << FLAMMABLE);
 const STONE = HIGH_DENSITY | GRAVITY | SLOW; // slow is set to have at least some vertical spread
 
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
-var flags, pos, object, newPos, imgdata, update, md, mx, my, i, colour, reactGroup;
+var flags, pos, object, newPos, imgdata, update, md, mx, my, i, colour, reactGroup1, reactGroup2;
 var currentType = 0;
 var evenLoop = UPDATE_BIT;
 
 var field = new Uint32Array(SIZE); // the main field holding all information
+field.fill(EMPTY);
 
-var particleTypes = [SAND, WATER, FIRE, SEED, BLOCK, GAS, STONE, OIL, SAND, SAND, // placable
+var particleTypes = [SAND, WATER, FIRE, SEED, BLOCK, GAS, STONE, OIL, TREE, WOOD, // placable
     WOOD, TREE, MUD]; // not placable
 
 var colours = [];
@@ -151,30 +173,27 @@ update = e => {
     
     for (pos=SIZE; pos--;){
         flags = field[pos];
-        reactGroup = 1 << (REAGENT_SHIFT - 1 + ((flags & REACTING) >> (REACTING_SHIFT))) //REAGENT_SHIFT << ((flags & REACTING) >> REACTING_SHIFT)
         if (flags ^ EMPTY && UPDATE_BIT & flags ^ evenLoop){
+            
+            reactGroup1 = flags & REACTING1 && (1 << REAGENT_SHIFT) << ((flags >> REACTING1_SHIFT) & 7);
+            reactGroup2 = flags & REACTING2 && (1 << REAGENT_SHIFT) << ((flags >> REACTING2_SHIFT) & 7);
             
             // the drawing is one frame behind on the physics, but I don't think that matters
             // this is way simpler
             pixel32Array[pos] |= pixelColours[flags|UPDATE_BIT];
             
             if (flags & VOLATILE && Math.random() < .1){
-                flags = 0;
+                flags = EMPTY;
             }
             
-            // react with neighbouring cells
-            if (flags & REACT_ABOVE && field[pos-WIDTH] & reactGroup){
-                field[pos-WIDTH] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
-            }
-            if (flags & REACT_BELOW && field[pos+WIDTH] & reactGroup){
-                field[pos+WIDTH] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
-            }
-            if (flags & REACT_SIDE){
-                if (field[pos+1] & reactGroup){
-                    field[pos+1] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
-                }
-                if (field[pos-1] & reactGroup){
-                    field[pos-1] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
+            if (flags & REACT_NEIGHBOURS){
+                for (i of [1, -1, WIDTH, -WIDTH]){
+                    if (field[pos+i] & reactGroup1){
+                        field[pos+i] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+                    }
+                    if (field[pos+i] & reactGroup2){
+                        flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                    }
                 }
             }
             
@@ -185,6 +204,7 @@ update = e => {
                 ((Math.random() - .5) * (1+(flags & SPREAD))|0);
             
             
+            
             // if the newPos is not solid, or this cell is fluid and the cell above newPos is not solid
             if(!(newPos<SIZE && newPos>0 &&
                 (field[newPos] & DENSITY) < (flags & DENSITY) ||
@@ -193,16 +213,21 @@ update = e => {
             }
             
             // react with newPos
-            if (field[newPos] & reactGroup){
-                flags = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
+            if (!(flags & REACT_NEIGHBOURS)){
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+                }
+                if (field[newPos] & reactGroup2){
+                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                }
             }
             
             // move to newPos
-            if (flags & TRAIL){
-                field[pos] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
-            } else {
-                field[pos] = field[newPos];
-            }
+//             if (flags & TRAIL){
+//                 field[pos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+//             } else {
+            field[pos] = field[newPos];
+//             }
             field[newPos] = flags ^ UPDATE_BIT;
         }
     }

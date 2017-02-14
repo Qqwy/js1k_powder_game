@@ -6,11 +6,21 @@
 <!-- easy html page for testing, since the code can just be loaded from the script tag instead of copy/pasted -->
 <!-- copy pasting can still be used for example for minified code -->
 <body>
-<canvas id="canvas" width="900px" height="600px">
+<canvas id="canvas" width="900px" height="500px">
 </canvas>
 <script>
-    window.a = document.getElementById("canvas");
-    window.c = a.getContext("2d");
+window.a = document.getElementById("canvas");
+window.c = a.getContext("2d");
+
+function printBits(n){
+    // print an integer in binary, LSB to HSB
+    s = ""
+    for (var i=0; i<32; i++){
+        s += n & 1;
+        n >>= 1;
+    }
+    console.log("ussgsvddtRRrrrrrrrRRRppppRRRpppp\n"+s);
+}
 </script>
 <script src="powdergame_cells.js">
 // objectlist
