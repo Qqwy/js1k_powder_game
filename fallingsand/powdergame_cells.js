@@ -42,7 +42,7 @@ const PRODUCT_SHIFT = 27;
 
 // those numbers refer to the index in particleTypes array
 const NUM_PLACABLE_TYPES = 10;
-const FIRE_PLACE = 3;
+const FIRE_PLACE = 2;
 const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
 const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
 const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
@@ -51,9 +51,9 @@ const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
 
 const REACTING_SHIFT = 22;
 const REACTING = (1<<PRODUCT_SHIFT) - (1<<REACTING_SHIFT);
-const IGNITE =  1 << REACTING_SHIFT + 0;
-const NEED_SOIL =  1 << REACTING_SHIFT + 1;
-const NEED_WATERING =  1 << REACTING_SHIFT + 2;
+const IGNITE = 1 << REACTING_SHIFT + 0;
+const NEED_SOIL = 2 << REACTING_SHIFT + 0;
+const NEED_WATERING = 3 << REACTING_SHIFT + 0;
 
 const REAGENT_SHIFT = 17;
 const REAGENT = (1 << REACTING_SHIFT) - (1<<REAGENT_SHIFT);
@@ -80,13 +80,13 @@ const STONE = HIGH_DENSITY | GRAVITY | SLOW; // slow is set to have at least som
 
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
-var flags, pos, object, newPos, imgdata, update, md, mx, my, i, colour;
+var flags, pos, object, newPos, imgdata, update, md, mx, my, i, colour, reactGroup;
 var currentType = 0;
 var evenLoop = UPDATE_BIT;
 
 var field = new Uint32Array(SIZE); // the main field holding all information
 
-var particleTypes = [SAND, WATER, OIL, FIRE, BLOCK, GAS, SEED, STONE, SAND, SAND, // placable
+var particleTypes = [SAND, WATER, FIRE, SEED, BLOCK, GAS, STONE, OIL, SAND, SAND, // placable
     WOOD, TREE, MUD]; // not placable
 
 var colours = [];
@@ -151,6 +151,7 @@ update = e => {
     
     for (pos=SIZE; pos--;){
         flags = field[pos];
+        reactGroup = 1 << (REAGENT_SHIFT - 1 + ((flags & REACTING) >> (REACTING_SHIFT))) //REAGENT_SHIFT << ((flags & REACTING) >> REACTING_SHIFT)
         if (flags ^ EMPTY && UPDATE_BIT & flags ^ evenLoop){
             
             // the drawing is one frame behind on the physics, but I don't think that matters
@@ -162,17 +163,17 @@ update = e => {
             }
             
             // react with neighbouring cells
-            if (flags & REACT_ABOVE && field[pos-WIDTH] & REAGENT & (flags >> (REACTING_SHIFT - REAGENT_SHIFT))){
+            if (flags & REACT_ABOVE && field[pos-WIDTH] & reactGroup){
                 field[pos-WIDTH] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
             }
-            if (flags & REACT_BELOW && field[pos+WIDTH] & REAGENT & (flags >> (REACTING_SHIFT - REAGENT_SHIFT))){
+            if (flags & REACT_BELOW && field[pos+WIDTH] & reactGroup){
                 field[pos+WIDTH] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
             }
             if (flags & REACT_SIDE){
-                if (field[pos+1] & REAGENT & (flags >> (REACTING_SHIFT - REAGENT_SHIFT))){
+                if (field[pos+1] & reactGroup){
                     field[pos+1] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
                 }
-                if (field[pos-1] & REAGENT & (flags >> (REACTING_SHIFT - REAGENT_SHIFT))){
+                if (field[pos-1] & reactGroup){
                     field[pos-1] = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
                 }
             }
@@ -192,7 +193,7 @@ update = e => {
             }
             
             // react with newPos
-            if (field[newPos] & REAGENT & (flags >> (REACTING_SHIFT - REAGENT_SHIFT))){
+            if (field[newPos] & reactGroup){
                 flags = particleTypes[flags>>PRODUCT_SHIFT]^evenLoop;
             }
             
