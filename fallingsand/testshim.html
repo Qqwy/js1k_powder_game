@@ -12,16 +12,9 @@
 window.a = document.getElementById("canvas");
 window.c = a.getContext("2d");
 
-function printBits(n){
-    // print an integer in binary, LSB to HSB
-    s = ""
-    for (var i=0; i<32; i++){
-        s += n & 1;
-        n >>= 1;
-    }
-    console.log("ussgsvddtRRrrrrrrrRRRppppRRRpppp\n"+s);
-}
+
 </script>
+<script src="debugfunctions.js"></script>
 <script src="powdergame_cells.js">
 // objectlist
 //u=[],v=[];for(i=0;1E4>i;i++)v[i]=[3,2E5*Math.random()|0];setInterval(()=>{c.clearRect(0,0,500,400);for(t of v)[q,r]=t,c.fillRect(r%500,r/500|0,1,1),q&2&&1^u[r+500]&1&&2E5>r&&(u[r+500]=q,u[r]=0,t[1]+=500)},30)
