@@ -7,7 +7,6 @@ function printBits(n){
         s += n & 1;
         n >>= 1;
     }
-    // index letters might nog be up to date
-    console.log("ussgsvddtRRrrrrrrrRRRppppRRRpppp\n"+s);
+    console.log("ussgfvdd__RrrrrrrrRRRppppRRRpppp\n"+s);
 }
 

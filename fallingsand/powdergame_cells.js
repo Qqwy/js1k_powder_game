@@ -10,6 +10,8 @@ const DROP_SIZE = 9;
 
 // binary flags
 
+const UPDATE_BIT = 1;
+
 // the higher the spread, the higher the chance of moving on the x axis
 // the values of these constants actually matter
 // since they are used in a multiplication
@@ -20,28 +22,37 @@ const HIGH_SPREAD = 6;
 // medium or high spread automatically implies fluid
 const FLUID = 4;
 
-const UPDATE_BIT = 1;
 const GRAVITY = 8;
+const SLOW = 16;
+const FLY = SLOW;
+const VOLATILE = 32;
 const DENSITY = 192;
 const LOW_DENSITY = 64;
 const MEDIUM_DENSITY = 128;
 const HIGH_DENSITY = 192;
 
-const VOLATILE = 32;
-const SLOW = 16;
-const FLY = SLOW;
-const REACT_ABOVE = 1<<9;
-const REACT_SIDE = 1<<10;
-const REACT_BELOW = 1<<10;
-const REACT_NEIGHBOURS = REACT_ABOVE | REACT_SIDE | REACT_BELOW;
+
+const REACT_NEIGHBOURS = 1<<10; //REACT_ABOVE | REACT_SIDE | REACT_BELOW;
 
 
 // those numbers refer to the index in particleTypes array
 const NUM_PLACABLE_TYPES = 10;
 const FIRE_PLACE = 3;
+const RAINBOW1_PLACE = 9;
 const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
 const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
 const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
+const GAS_PLACE = 3 + NUM_PLACABLE_TYPES;
+const STONE_PLACE = 4 + NUM_PLACABLE_TYPES;
+const RAINBOW2_PLACE = 5 + NUM_PLACABLE_TYPES;
+
+
+/* Each element can have 2 reactions in which it plays as an actor
+ * Reaction 1 changes the reactable it reacts with, reaction 2 changes itself
+ * movement still proceeds as usual
+ * Both reactions have a different reactable group. they have 3 bits to refer to this group
+ * Having the reactable group at 0 means this reaction won't happen
+ */
 
 
 const REAGENT_SHIFT = 10;
@@ -49,7 +60,8 @@ const FLAMMABLE = 1;
 const SOIL = 2;
 const WATERING = 3;
 const PERFORABLE = 4; // questionable use
-const DESTROY = 5
+const DESTROY = 5;
+const CHEMICAL = 6;
 
 const REACT_AS = 1<<REAGENT_SHIFT;
 
@@ -71,38 +83,41 @@ const REACTING2 = (1<<PRODUCT2_SHIFT) - (1<<REACTING2_SHIFT);
 // particle types
 const EMPTY = (REACT_AS << PERFORABLE);
 
-const SAND = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << FLAMMABLE) | (REACT_AS << SOIL) | (WATERING << REACT2) | (MUD_PLACE << PRODUCT2_SHIFT) | (REACT_AS << DESTROY);
+const DUST = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << FLAMMABLE) | (REACT_AS << SOIL) | (WATERING << REACT2) | (MUD_PLACE << PRODUCT2_SHIFT) | (REACT_AS << DESTROY);
 const MUD = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << SOIL) | SLOW | (REACT_AS << DESTROY);
 const WATER = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | (REACT_AS << WATERING) | (REACT_AS << PERFORABLE) | (REACT_AS << DESTROY);
-const OIL = LOW_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | (REACT_AS << FLAMMABLE) | (REACT_AS << DESTROY);
-const FIRE = LOW_DENSITY | FLY | HIGH_SPREAD | VOLATILE | (FLAMMABLE << REACT1) | REACT_NEIGHBOURS | (FIRE_PLACE << PRODUCT1_SHIFT) | (WATERING << REACT2) | (EMPTY << PRODUCT2_SHIFT) | (REACT_AS << DESTROY);
+const OIL = LOW_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | (REACT_AS << FLAMMABLE) | (REACT_AS << DESTROY) | (CHEMICAL << REACT2) | REACT_NEIGHBOURS | (GAS_PLACE << PRODUCT2_SHIFT);
+const FIRE = LOW_DENSITY | FLY | HIGH_SPREAD | VOLATILE | (FLAMMABLE << REACT1) | REACT_NEIGHBOURS | (FIRE_PLACE << PRODUCT1_SHIFT) | (WATERING << REACT2);
 const BLOCK = HIGH_DENSITY;
-const GAS = LOW_DENSITY | FLY | HIGH_SPREAD | (REACT_AS << FLAMMABLE) | FLUID | (REACT_AS << DESTROY);
+const GAS = LOW_DENSITY | FLY | HIGH_SPREAD | (REACT_AS << FLAMMABLE) | FLUID;
 const SEED = HIGH_DENSITY | GRAVITY | LOW_SPREAD | (REACT_AS << FLAMMABLE) | (SOIL << REACT2) | REACT_NEIGHBOURS | (TREE_PLACE << PRODUCT2_SHIFT) | (REACT_AS << DESTROY);
 const TREE = HIGH_DENSITY | FLY | LOW_SPREAD | VOLATILE | (PERFORABLE << REACT1) | (WOOD_PLACE << PRODUCT1_SHIFT) | (REACT_AS << DESTROY);
-const WOOD = HIGH_DENSITY | (WATERING << REACT2) | REACT_ABOVE | (REACT_AS << FLAMMABLE) | (TREE_PLACE << PRODUCT2_SHIFT) | (REACT_AS << DESTROY);
-const STONE = HIGH_DENSITY | GRAVITY | SLOW; // slow is set to have at least some vertical spread
-const ACID = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | REACT_NEIGHBOURS | DESTROY << REACT1 | DESTROY << REACT2;
+const WOOD = HIGH_DENSITY | (WATERING << REACT2) | REACT_NEIGHBOURS | (REACT_AS << FLAMMABLE) | (TREE_PLACE << PRODUCT2_SHIFT) | (REACT_AS << DESTROY);
+const STONE = HIGH_DENSITY | GRAVITY | SLOW | (REACT_AS << DESTROY); // slow is set to have at least some vertical spread
+const ACID = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | REACT_NEIGHBOURS | DESTROY << REACT1 | DESTROY << REACT2 | REACT_AS << CHEMICAL;
+const MAGMA = MEDIUM_DENSITY | GRAVITY | FLUID | MEDIUM_SPREAD | REACT_NEIGHBOURS | (FLAMMABLE << REACT1) | (FIRE_PLACE << PRODUCT1_SHIFT) | (WATERING << REACT2) | (STONE_PLACE << PRODUCT2_SHIFT);
+const RAINBOW1 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW2_PLACE << PRODUCT2_SHIFT);
+const RAINBOW2 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW1_PLACE << PRODUCT2_SHIFT);
 
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
-var flags, pos, object, newPos, imgdata, update, md, mx, my, i, colour, reactGroup1, reactGroup2;
+var flags, pos, object, newPos, imgdata, update, md, mx, my, i, j, colour, reactGroup1, reactGroup2;
 var currentType = 0;
 var evenLoop = UPDATE_BIT;
 
 var field = new Uint32Array(SIZE); // the main field holding all information
 field.fill(EMPTY);
 
-var particleTypes = [EMPTY, SAND, WATER, FIRE, SEED, BLOCK, ACID, STONE, OIL, TREE, // placable
-    WOOD, TREE, MUD]; // not placable
+var particleTypes = [EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, RAINBOW1, // placable
+    WOOD, TREE, MUD, GAS, STONE, RAINBOW2]; // not placable
 
 var colours = [];
 // RGB
-colours[SAND|UPDATE_BIT] = 'ba8';//0x88aabb;
+colours[DUST|UPDATE_BIT] = 'ba8';//0x88aabb;
 colours[MUD|UPDATE_BIT] = '975';//0x7799bb;
 colours[WATER|UPDATE_BIT] = '27f';//0xff2222;
 colours[OIL|UPDATE_BIT] = '733';//0x333377;
-colours[FIRE|UPDATE_BIT] = 'f00';//0x0000ff;
+colours[FIRE|UPDATE_BIT] = 'd00';//0x0000ff;
 colours[BLOCK| UPDATE_BIT] = '888';//0x888888;
 colours[GAS| UPDATE_BIT] = '060';//0x006600;
 colours[TREE| UPDATE_BIT] = '0a0';//0x00aa00;
@@ -110,6 +125,9 @@ colours[SEED | UPDATE_BIT] = '6a6';//0x66aa66;
 colours[WOOD | UPDATE_BIT] = '980';//0x008899;
 colours[STONE | UPDATE_BIT] = 'bbb';
 colours[ACID | UPDATE_BIT] = 'ff0';
+colours[MAGMA | UPDATE_BIT] = 'f30';
+colours[RAINBOW1 | UPDATE_BIT] = 'f0f';
+colours[RAINBOW2 | UPDATE_BIT] = '0f0';
 
 // doing this calcualtion each step was terrible for performance
 // therefore, calculate the colours now
@@ -215,12 +233,7 @@ update = e => {
                 }
             }
             
-            // move to newPos
-//             if (flags & TRAIL){
-//                 field[pos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-//             } else {
             field[pos] = field[newPos];
-//             }
             field[newPos] = flags ^ UPDATE_BIT;
         }
     }
