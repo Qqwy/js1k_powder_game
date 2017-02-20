@@ -1,32 +1,4 @@
 
-
-// declaring variables as local allows closure to simplify the names
-// remove these declarations after closure compiling
-var flags,
-    pos,
-    object,
-    newPos,
-    imgdata,
-    update,
-    md,
-    mx,
-    my,
-    i,
-    j,
-    colour,
-    reactGroup1,
-    reactGroup2,
-    drawData,
-    currentType,
-    evenLoop,
-    field,
-    particleTypes,
-    pixelColours,
-    imgDataArray,
-    pixel32Array;
-
-
-
 const WIDTH = 800;
 const HEIGHT = 500;
 const OBJECTS = 100000;
@@ -60,8 +32,22 @@ const MEDIUM_DENSITY = 128;
 const HIGH_DENSITY = 192;
 
 
-const REACT_NEIGHBOURS = 1<<8; //REACT_ABOVE | REACT_SIDE | REACT_BELOW;
+const REACT_NEIGHBOURS = 1<<10; //REACT_ABOVE | REACT_SIDE | REACT_BELOW;
 
+
+// those numbers refer to the index in particleTypes array
+const NUM_PLACABLE_TYPES = 10;
+const FIRE_PLACE = 3;
+const BLOCK_PLACE = 5;
+const ICE_PLACE = 9;
+// const RAINBOW1_PLACE = 9;
+const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
+const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
+const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
+const GAS_PLACE = 3 + NUM_PLACABLE_TYPES;
+const STONE_PLACE = 4 + NUM_PLACABLE_TYPES;
+const LEAF_PLACE = 5 + NUM_PLACABLE_TYPES;
+// const RAINBOW2_PLACE = 5 + NUM_PLACABLE_TYPES;
 
 
 /* Each element can have 2 reactions in which it plays as an actor
@@ -83,33 +69,19 @@ const CHEMICAL = 6;
 const REACT_AS = 1<<REAGENT_SHIFT;
 
 
-const REACTING1_SHIFT = 16;
+const REACTING1_SHIFT = 18;
 const REACT1 = REACTING1_SHIFT;
 // afther the PRODUCT_SHIFTth bit, the key for the product starts
 // the PRODUCT number is the index of that type in the particleTypes array
-const PRODUCT1_SHIFT = 19;
+const PRODUCT1_SHIFT = 21;
 const REACTING1 = (1<<PRODUCT1_SHIFT) - (1<<REACTING1_SHIFT);
 
-const REACTING2_SHIFT = 23;
+const REACTING2_SHIFT = 25;
 const REACT2 = REACTING2_SHIFT;
-const PRODUCT2_SHIFT = 26;
+const PRODUCT2_SHIFT = 28;
 const REACTING2 = (1<<PRODUCT2_SHIFT) - (1<<REACTING2_SHIFT);
 
 
-
-// those numbers refer to the index in particleTypes array
-const NUM_PLACABLE_TYPES = 10;
-const FIRE_PLACE = 3;
-const BLOCK_PLACE = 5;
-const ICE_PLACE = 9;
-// const RAINBOW1_PLACE = 9;
-const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
-const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
-const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
-const GAS_PLACE = 3 + NUM_PLACABLE_TYPES;
-const STONE_PLACE = 4 + NUM_PLACABLE_TYPES;
-const LEAF_PLACE = 5 + NUM_PLACABLE_TYPES;
-// const RAINBOW2_PLACE = 5 + NUM_PLACABLE_TYPES;
 
 // particle types
 const EMPTY = (REACT_AS << PERFORABLE);
@@ -134,17 +106,17 @@ const ICE = HIGH_DENSITY | (REACT_AS << DESTRUCTIBLE) | REACT_NEIGHBOURS | (WATE
 
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
-// var flags, pos, object, newPos, imgdata, update, md, mx, my, i, j, colour, reactGroup1, reactGroup2, imgData;
-currentType = 0;
-evenLoop = UPDATE_BIT;
+var flags, pos, object, newPos, imgdata, update, md, mx, my, i, j, colour, reactGroup1, reactGroup2, imgData;
+var currentType = 0;
+var evenLoop = UPDATE_BIT;
 
-field = new Uint32Array(SIZE); // the main field holding all information
+var field = new Uint32Array(SIZE); // the main field holding all information
 field.fill(EMPTY);
 
-particleTypes = [EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, ICE, // placable
+var particleTypes = [EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, ICE, // placable
     WOOD, TREE, MUD, GAS, STONE, LEAF]; // not placable
 
-// var colours = {};
+var colours = {};
 // RGB
 // colours[DUST|UPDATE_BIT] = 'ba8';//0x88aabb;
 // colours[MUD|UPDATE_BIT] = '975';//0x7799bb;
@@ -166,7 +138,7 @@ particleTypes = [EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, ICE, /
 
 // doing this calcualtion each step was terrible for performance
 // therefore, calculate the colours now
-pixelColours = {};
+var pixelColours = {};
 // RGB
 pixelColours[DUST|UPDATE_BIT] = 0x88aabb;
 pixelColours[MUD|UPDATE_BIT] = 0x557799;
@@ -192,9 +164,9 @@ pixelColours[ICE | UPDATE_BIT] = 0xffbbbb;
 //     }
 // };
 
-drawData = new ArrayBuffer(SIZE*4);
-pixel32Array = new Uint32Array(drawData)
-imgDataArray = new Uint8ClampedArray(drawData);
+var drawData = new ArrayBuffer(SIZE*4);
+var pixel32Array = new Uint32Array(drawData)
+var imgDataArray = new Uint8ClampedArray(drawData);
 
 md = 0;
 mx = my = -1;
@@ -224,7 +196,9 @@ setInterval(e => {
     // if the mouse is down the currentType particle will be dropped in a circle at the mouse position
     for (y=DROP_SIZE;md && --y>-DROP_SIZE;){
         for (x=DROP_SIZE;--x>-DROP_SIZE;){
-            field[mx+x+(my+y)*WIDTH] = particleTypes[currentType] ^ evenLoop ^ UPDATE_BIT;
+//             if (x*x+y*y < DROP_SIZE*DROP_SIZE){
+                field[mx+x+(my+y)*WIDTH] = particleTypes[currentType] ^ evenLoop ^ UPDATE_BIT;
+//             }
         }
     }
     
@@ -233,7 +207,6 @@ setInterval(e => {
     
     for (pos=SIZE; pos--;){
         flags = field[pos];
-        // bitwise xor also works as inequality test
         if (flags ^ EMPTY && UPDATE_BIT & flags ^ evenLoop){
             
             reactGroup1 = flags & REACTING1 && (1 << REAGENT_SHIFT) << ((flags >> REACTING1_SHIFT) & 7);
@@ -283,11 +256,9 @@ setInterval(e => {
             
             
             // if the newPos is not solid, or this cell is fluid and the cell above newPos is not solid
-            if(!(
-                    newPos<SIZE && newPos>0 &&
-                    (field[newPos] & DENSITY) < (flags & DENSITY) ||
-                    flags & FLUID && (field[newPos = (newPos%WIDTH)+(pos/WIDTH|0)*WIDTH] & DENSITY) < (flags & DENSITY)
-            )){
+            if(!(newPos<SIZE && newPos>0 &&
+                (field[newPos] & DENSITY) < (flags & DENSITY) ||
+                flags & FLUID && (field[newPos = (newPos%WIDTH)+(pos/WIDTH|0)*WIDTH] & DENSITY) < (flags & DENSITY))){
                 newPos = pos;
             }
             
@@ -307,14 +278,15 @@ setInterval(e => {
     }
     
     for (i=NUM_PLACABLE_TYPES;--i;){
-        for (x=9; x--;){
-            for (y=9; y--;){
-                pixel32Array[x+16*i+y*WIDTH+(i==currentType)*9*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
+        for (x=9; --x;){
+            for (y=9; --y;){
+                pixel32Array[x+16*i%WIDTH+y*WIDTH+(i==currentType)*9*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
             }
         }
     }
     
-    c.putImageData(new ImageData(imgDataArray, WIDTH, HEIGHT),0,0);
+    imgData = new ImageData(imgDataArray, WIDTH, HEIGHT);
+    c.putImageData(imgData,0,0);
     
     
     
