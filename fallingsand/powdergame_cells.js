@@ -72,7 +72,7 @@ const REACT_NEIGHBOURS = 1<<8; //REACT_ABOVE | REACT_SIDE | REACT_BELOW;
  */
 
 
-const REAGENT_SHIFT = 10;
+const REAGENT_SHIFT = 9;
 const FLAMMABLE = 1;
 const SOIL = 2;
 const WATERING = 3;
@@ -99,16 +99,20 @@ const REACTING2 = (1<<PRODUCT2_SHIFT) - (1<<REACTING2_SHIFT);
 
 // those numbers refer to the index in particleTypes array
 const NUM_PLACABLE_TYPES = 10;
-const FIRE_PLACE = 3;
-const BLOCK_PLACE = 5;
-const ICE_PLACE = 9;
+
+const PLACABLE_BEGIN = 0;
+const NON_PLACABLE_BEGIN = NUM_PLACABLE_TYPES;
+
+const FIRE_PLACE = PLACABLE_BEGIN + 3;
+const BLOCK_PLACE = PLACABLE_BEGIN + 5;
+const ICE_PLACE = PLACABLE_BEGIN + 9;
 // const RAINBOW1_PLACE = 9;
-const WOOD_PLACE = 0 + NUM_PLACABLE_TYPES;
-const TREE_PLACE = 1 + NUM_PLACABLE_TYPES;
-const MUD_PLACE = 2 + NUM_PLACABLE_TYPES;
-const GAS_PLACE = 3 + NUM_PLACABLE_TYPES;
-const STONE_PLACE = 4 + NUM_PLACABLE_TYPES;
-const LEAF_PLACE = 5 + NUM_PLACABLE_TYPES;
+const WOOD_PLACE = NON_PLACABLE_BEGIN + 0;
+const TREE_PLACE = NON_PLACABLE_BEGIN + 1;
+const MUD_PLACE = NON_PLACABLE_BEGIN + 2;
+const GAS_PLACE = NON_PLACABLE_BEGIN + 3;
+const STONE_PLACE = NON_PLACABLE_BEGIN + 4;
+const LEAF_PLACE = NON_PLACABLE_BEGIN + 5;
 // const RAINBOW2_PLACE = 5 + NUM_PLACABLE_TYPES;
 
 // particle types
@@ -199,8 +203,8 @@ setInterval(e => {
     
     
     // This double for loop does two very different things
-    for (y=DROP_SIZE;--y>-DROP_SIZE;){
-        for (x=DROP_SIZE;--x>-DROP_SIZE;){
+    for (y=DROP_SIZE;y-->-DROP_SIZE;){
+        for (x=DROP_SIZE;x-->-DROP_SIZE;){
             // if the mouse is down the currentType particle will be dropped in a circle at the mouse position
             if (md){
                 field[mx+my*WIDTH+x+y*WIDTH] = particleTypes[currentType] ^ evenLoop;
@@ -239,18 +243,18 @@ setInterval(e => {
                 
                 // this is not the same newPos as later, but reusing variables saves 20 bytes when crushed
                 newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup2){
-                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup1){
                     field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+                }
+                if (field[newPos] & reactGroup2){
+                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
                 }
                 newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup2){
-                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup1){
                     field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+                }
+                if (field[newPos] & reactGroup2){
+                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
                 }
             }
             

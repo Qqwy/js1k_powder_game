@@ -7,6 +7,6 @@ function printBits(n){
         s += n & 1;
         n >>= 1;
     }
-    console.log("ussgfvdd__RrrrrrrrRRRppppRRRpppp\n"+s);
+    console.log("ussgfvddRrrrrrrrRRRppppRRRpppp__\n"+s);
 }
 
