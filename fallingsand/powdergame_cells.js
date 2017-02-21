@@ -33,7 +33,7 @@ const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
 
-const DROP_SIZE = 9;
+const DROP_SIZE = 8;
 
 
 // binary flags
@@ -135,34 +135,14 @@ const ICE = HIGH_DENSITY | (REACT_AS << DESTRUCTIBLE) | REACT_NEIGHBOURS | (WATE
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
 // var flags, pos, object, newPos, imgdata, update, md, mx, my, i, j, colour, reactGroup1, reactGroup2, imgData;
-currentType = 0;
-evenLoop = UPDATE_BIT;
+// currentType = 0;
+evenLoop = currentType = md = mx = my = 0;
 
 field = new Uint32Array(SIZE); // the main field holding all information
 field.fill(EMPTY);
 
 particleTypes = [EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, ICE, // placable
     WOOD, TREE, MUD, GAS, STONE, LEAF]; // not placable
-
-// var colours = {};
-// RGB
-// colours[DUST|UPDATE_BIT] = 'ba8';//0x88aabb;
-// colours[MUD|UPDATE_BIT] = '975';//0x7799bb;
-// colours[WATER|UPDATE_BIT] = '27f';//0xff2222;
-// colours[OIL|UPDATE_BIT] = '733';//0x333377;
-// colours[FIRE|UPDATE_BIT] = 'd00';//0x0000ff;
-// colours[BLOCK| UPDATE_BIT] = '888';//0x888888;
-// colours[GAS| UPDATE_BIT] = '060';//0x006600;
-// colours[TREE| UPDATE_BIT] = '0c0';//0x00aa00; // should this be black?
-// colours[SEED | UPDATE_BIT] = '6a6';//0x66aa66;
-// colours[WOOD | UPDATE_BIT] = '870';//0x008899;
-// colours[STONE | UPDATE_BIT] = 'bbb';
-// colours[ACID | UPDATE_BIT] = 'ff0';
-// colours[MAGMA | UPDATE_BIT] = 'f30';
-// // colours[RAINBOW1 | UPDATE_BIT] = 'f0f';
-// // colours[RAINBOW2 | UPDATE_BIT] = '0f0';
-// colours[LEAF | UPDATE_BIT] = '090';
-// colours[ICE | UPDATE_BIT] = 'bbf';
 
 // doing this calcualtion each step was terrible for performance
 // therefore, calculate the colours now
@@ -175,7 +155,7 @@ pixelColours[OIL|UPDATE_BIT] = 0x333377;
 pixelColours[FIRE|UPDATE_BIT] = 0xdd;
 pixelColours[BLOCK| UPDATE_BIT] = 0x888888;
 pixelColours[GAS| UPDATE_BIT] = 0x6600;
-pixelColours[TREE| UPDATE_BIT] = 0xcc00;// should this be black?
+pixelColours[TREE| UPDATE_BIT] = 0x9900;// should this be black?
 pixelColours[SEED | UPDATE_BIT] = 0x66aa66;
 pixelColours[WOOD | UPDATE_BIT] = 0x7788;
 pixelColours[STONE | UPDATE_BIT] = 0xbbbbbb;
@@ -186,18 +166,11 @@ pixelColours[MAGMA | UPDATE_BIT] = 0x33ff;
 pixelColours[LEAF | UPDATE_BIT] = 0x9900;
 pixelColours[ICE | UPDATE_BIT] = 0xffbbbb;
 
-// for (colour in colours){
-//     for (i=3;i--;){
-//         pixelColours[colour] |= "0x"+colours[colour][i]+colours[colour][i]<<i*8;
-//     }
-// };
 
 drawData = new ArrayBuffer(SIZE*4);
 pixel32Array = new Uint32Array(drawData)
 imgDataArray = new Uint8ClampedArray(drawData);
 
-md = 0;
-mx = my = -1;
 // right clicking used to give a problem because it sometimes triggers mousedown but not mouseup
 // setting instead of adding should fix this
 onmousedown = e => {md=1};// without brackets closure would add a return statement
@@ -221,15 +194,28 @@ setInterval(e => {
     
 //     var updateStart = Date.now();
     
-    // if the mouse is down the currentType particle will be dropped in a circle at the mouse position
-    for (y=DROP_SIZE;md && --y>-DROP_SIZE;){
+    // set the alpha here so it doesn't need to be in the colours
+    pixel32Array.fill(0xff000000);
+    
+    
+    // This double for loop does two very different things
+    for (y=DROP_SIZE;--y>-DROP_SIZE;){
         for (x=DROP_SIZE;--x>-DROP_SIZE;){
-            field[mx+x+(my+y)*WIDTH] = particleTypes[currentType] ^ evenLoop ^ UPDATE_BIT;
+            // if the mouse is down the currentType particle will be dropped in a circle at the mouse position
+            if (md){
+                field[mx+my*WIDTH+x+y*WIDTH] = particleTypes[currentType] ^ evenLoop;
+            }
+            // show the possible elements in the left upper corner, selected element is lower
+            for (i=NUM_PLACABLE_TYPES;--i;){
+                pixel32Array[16*i+x+y*WIDTH+(i==currentType)*DROP_SIZE*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
+            }
         }
     }
     
-    // set the alpha here so it doesn't 
-    pixel32Array.fill(0xff000000);
+    
+    // toggle update bit of update
+    evenLoop ^= UPDATE_BIT;
+    
     
     for (pos=SIZE; pos--;){
         flags = field[pos];
@@ -244,41 +230,34 @@ setInterval(e => {
             pixel32Array[pos] |= pixelColours[flags|UPDATE_BIT];
             
             if (flags & VOLATILE && Math.random() < .1){
-                flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;//EMPTY;
+                flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
             }
             
             if (flags & REACT_NEIGHBOURS){
-                // closure can't compile for..of loops well.
-                // it is probably easier to write this for loop and replace it in the compiled code than to replace the for..of workaround
-                // keeping replaceMe as undeclared grobal variable prevents closure from renaming it
-                // that should make this part easier to find
-                // for (replaceMe=0; replaceMe<4; replaceMe++){
-                    // i = [1, -1, WIDTH, -WIDTH][replaceMe];
-//                 for (i of [1, -1, WIDTH, -WIDTH]){
-                i = [1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                j = field[pos+i]
-                if (j & reactGroup1){
-                    field[pos+i] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
-                if (j & reactGroup2){
+                // select 2 random neighbouring positions and react with them
+                // first half of this block should be exactly the same as 2nd half
+                
+                // this is not the same newPos as later, but reusing variables saves 20 bytes when crushed
+                newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
+                if (field[newPos] & reactGroup2){
                     flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
                 }
-                i = [1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                j = field[pos+i]
-                if (j & reactGroup1){
-                    field[pos+i] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
                 }
-                if (j & reactGroup2){
+                newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
+                if (field[newPos] & reactGroup2){
                     flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
                 }
-//                 }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
+                }
             }
             
             
-            // most probably go straight down, but there is a small chance to go left or right depending on spread
-            newPos = pos +
-                WIDTH*(!!(flags & GRAVITY) - (flags&SLOW && Math.random()>.5)) +
-                ((Math.random() - .5) * (1+(flags & SPREAD))|0);
+            // most probably go straight down, but there is a chance to go left or right depending on spread
+            newPos = pos + ((Math.random() - .5) * (1+(flags & SPREAD))|0) + // should be the same as in the fluid check
+                WIDTH*(!!(flags & GRAVITY) - (flags&SLOW && Math.random()>.5));
             
             
             
@@ -286,7 +265,7 @@ setInterval(e => {
             if(!(
                     newPos<SIZE && newPos>0 &&
                     (field[newPos] & DENSITY) < (flags & DENSITY) ||
-                    flags & FLUID && (field[newPos = (newPos%WIDTH)+(pos/WIDTH|0)*WIDTH] & DENSITY) < (flags & DENSITY)
+                    flags & FLUID && (field[newPos = pos + ((Math.random() - .5) * (1+(flags & SPREAD))|0)] & DENSITY) < (flags & DENSITY)
             )){
                 newPos = pos;
             }
@@ -301,16 +280,9 @@ setInterval(e => {
                 }
             }
             
+            // swap pos and newPos
             field[pos] = field[newPos];
             field[newPos] = flags ^ UPDATE_BIT;
-        }
-    }
-    
-    for (i=NUM_PLACABLE_TYPES;--i;){
-        for (x=9; x--;){
-            for (y=9; y--;){
-                pixel32Array[x+16*i+y*WIDTH+(i==currentType)*9*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
-            }
         }
     }
     
@@ -318,8 +290,6 @@ setInterval(e => {
     
     
     
-    // toggle update bit of update
-    evenLoop ^= UPDATE_BIT;
     
 //     console.log((Date.now()-updateEnd));/*/-startTime)/++totalSteps);/**/
 //     updateEnd = Date.now();
