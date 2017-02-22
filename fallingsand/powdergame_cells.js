@@ -33,7 +33,7 @@ const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
 
-const DROP_SIZE = 8;
+const DROP_SIZE = 4;
 
 
 // binary flags
@@ -211,7 +211,7 @@ setInterval(e => {
             }
             // show the possible elements in the left upper corner, selected element is lower
             for (i=NUM_PLACABLE_TYPES;--i;){
-                pixel32Array[16*i+x+y*WIDTH+(i==currentType)*DROP_SIZE*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
+                pixel32Array[16*i+x+y*WIDTH+(i==currentType)*DROP_SIZE*WIDTH+DROP_SIZE*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
             }
         }
     }
