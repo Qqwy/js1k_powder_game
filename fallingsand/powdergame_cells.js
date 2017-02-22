@@ -106,14 +106,14 @@ const NON_PLACABLE_BEGIN = NUM_PLACABLE_TYPES;
 const FIRE_PLACE = PLACABLE_BEGIN + 3;
 const BLOCK_PLACE = PLACABLE_BEGIN + 5;
 const ICE_PLACE = PLACABLE_BEGIN + 9;
-// const RAINBOW1_PLACE = 9;
+const RAINBOW1_PLACE = PLACABLE_BEGIN +9;
 const WOOD_PLACE = NON_PLACABLE_BEGIN + 0;
 const TREE_PLACE = NON_PLACABLE_BEGIN + 1;
 const MUD_PLACE = NON_PLACABLE_BEGIN + 2;
 const GAS_PLACE = NON_PLACABLE_BEGIN + 3;
 const STONE_PLACE = NON_PLACABLE_BEGIN + 4;
 const LEAF_PLACE = NON_PLACABLE_BEGIN + 5;
-// const RAINBOW2_PLACE = 5 + NUM_PLACABLE_TYPES;
+const RAINBOW2_PLACE = NON_PLACABLE_BEGIN + 2;
 
 // particle types
 const EMPTY = (REACT_AS << PERFORABLE);
@@ -133,8 +133,8 @@ const STONE = HIGH_DENSITY | GRAVITY | SLOW | (REACT_AS << DESTRUCTIBLE); // slo
 const ACID = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | REACT_NEIGHBOURS | DESTRUCTIBLE << REACT1 | DESTRUCTIBLE << REACT2 | REACT_AS << CHEMICAL;
 const MAGMA = MEDIUM_DENSITY | GRAVITY | FLUID | MEDIUM_SPREAD | REACT_NEIGHBOURS | (FLAMMABLE << REACT1) | (FIRE_PLACE << PRODUCT1_SHIFT) | (WATERING << REACT2) | (STONE_PLACE << PRODUCT2_SHIFT);
 const ICE = HIGH_DENSITY | (REACT_AS << DESTRUCTIBLE) | REACT_NEIGHBOURS | (WATERING << REACT1) | (ICE_PLACE << PRODUCT1_SHIFT);
-// const RAINBOW1 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW2_PLACE << PRODUCT2_SHIFT);
-// const RAINBOW2 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW1_PLACE << PRODUCT2_SHIFT);
+const RAINBOW1 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW2_PLACE << PRODUCT2_SHIFT);
+const RAINBOW2 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW1_PLACE << PRODUCT2_SHIFT);
 
 // declaring variables as local allows closure to simplify the names
 // remove these declarations after closure compiling
@@ -165,8 +165,8 @@ pixelColours[WOOD | UPDATE_BIT] = 0x7788;
 pixelColours[STONE | UPDATE_BIT] = 0xbbbbbb;
 pixelColours[ACID | UPDATE_BIT] = 0xffff;
 pixelColours[MAGMA | UPDATE_BIT] = 0x33ff;
-// pixelColours[RAINBOW1 | UPDATE_BIT] = 'f0f';
-// pixelColours[RAINBOW2 | UPDATE_BIT] = '0f0';
+// pixelColours[RAINBOW1 | UPDATE_BIT] = 0xff00ff;
+// pixelColours[RAINBOW2 | UPDATE_BIT] = 0xff00;
 pixelColours[LEAF | UPDATE_BIT] = 0x9900;
 pixelColours[ICE | UPDATE_BIT] = 0xffbbbb;
 
@@ -187,7 +187,8 @@ onmousemove = e => {mx = e.offsetX; my = e.offsetY};
 // press the number keys to set the corresponding type of spawned particle
 // letter keys work as well in the same order
 // other keys might work as well
-onkeydown = e => {currentType = e.which % 16}
+onwheel = e => {currentType += e.deltaY > 0 || NUM_PLACABLE_TYPES - 1}
+// onkeydown = e => {currentType = e.which % 16}
 
 // var startTime = Date.now();
 // var totalSteps = 0;
@@ -207,11 +208,11 @@ setInterval(e => {
         for (x=DROP_SIZE;x-->-DROP_SIZE;){
             // if the mouse is down the currentType particle will be dropped in a circle at the mouse position
             if (md){
-                field[mx+my*WIDTH+x+y*WIDTH] = particleTypes[currentType] ^ evenLoop;
+                field[mx+my*WIDTH+x+y*WIDTH] = particleTypes[currentType % NUM_PLACABLE_TYPES] ^ evenLoop;
             }
             // show the possible elements in the left upper corner, selected element is lower
             for (i=NUM_PLACABLE_TYPES;--i;){
-                pixel32Array[16*i+x+y*WIDTH+(i==currentType)*DROP_SIZE*WIDTH+DROP_SIZE*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
+                pixel32Array[16*i+x+y*WIDTH+(i==currentType % NUM_PLACABLE_TYPES)*DROP_SIZE*WIDTH+DROP_SIZE*WIDTH] |= pixelColours[particleTypes[i]|UPDATE_BIT]
             }
         }
     }
