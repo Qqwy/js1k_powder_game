@@ -33,7 +33,7 @@ const HEIGHT = 500;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
 
-const DROP_SIZE = 8;
+const DROP_SIZE = 4;
 
 
 // binary flags
@@ -246,18 +246,18 @@ setInterval(e => {
                 
                 // this is not the same newPos as later, but reusing variables saves 20 bytes when crushed
                 newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup2){
                     flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
                 }
                 newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup2){
                     flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
                 }
             }
             
@@ -279,11 +279,11 @@ setInterval(e => {
             
             // react with newPos
             if (!(flags & REACT_NEIGHBOURS)){
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup2){
                     flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
                 }
             }
             
