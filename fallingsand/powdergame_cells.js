@@ -1,3 +1,8 @@
+// ==ClosureCompiler==
+// @output_file_name default.js
+// @compilation_level ADVANCED_OPTIMIZATIONS
+// ==/ClosureCompiler==
+
 
 
 // declaring variables as local allows closure to simplify the names
@@ -88,21 +93,22 @@ const REACT1 = REACTING1_SHIFT;
 // afther the PRODUCT_SHIFTth bit, the key for the product starts
 // the PRODUCT number is the index of that type in the particleTypes array
 const PRODUCT1_SHIFT = 19;
-const REACTING1 = (1<<PRODUCT1_SHIFT) - (1<<REACTING1_SHIFT);
+const REACTING1 = (1<<(PRODUCT1_SHIFT)) - (1<<REACTING1_SHIFT);
 
 const REACTING2_SHIFT = 23;
 const REACT2 = REACTING2_SHIFT;
 const PRODUCT2_SHIFT = 26;
-const REACTING2 = (1<<PRODUCT2_SHIFT) - (1<<REACTING2_SHIFT);
+const REACTING2 = (1<<(PRODUCT2_SHIFT)) - (1<<REACTING2_SHIFT);
 
 
 
 // those numbers refer to the index in particleTypes array
-const NUM_PLACABLE_TYPES = 10;
+const NUM_PLACABLE_TYPES = 16;
 
 const PLACABLE_BEGIN = 0;
-const NON_PLACABLE_BEGIN = NUM_PLACABLE_TYPES;
+const NON_PLACABLE_BEGIN = 10//NUM_PLACABLE_TYPES;
 
+const EMPTY_PLACE = PLACABLE_BEGIN + 0;
 const FIRE_PLACE = PLACABLE_BEGIN + 3;
 const BLOCK_PLACE = PLACABLE_BEGIN + 5;
 const ICE_PLACE = PLACABLE_BEGIN + 9;
@@ -130,8 +136,8 @@ const TREE = HIGH_DENSITY | FLY | LOW_SPREAD | VOLATILE | (PERFORABLE << REACT1)
 const WOOD = HIGH_DENSITY | (REACT_AS << FLAMMABLE) | (REACT_AS << DESTRUCTIBLE) | REACT_NEIGHBOURS | (PERFORABLE << REACT2) | (LEAF_PLACE << PRODUCT2_SHIFT);
 const LEAF = HIGH_DENSITY | REACT_NEIGHBOURS | (REACT_AS << FLAMMABLE) | (WATERING << REACT2) | (TREE_PLACE << PRODUCT2_SHIFT) | (REACT_AS << DESTRUCTIBLE);
 const STONE = HIGH_DENSITY | GRAVITY | SLOW | (REACT_AS << DESTRUCTIBLE); // slow is set to have at least some vertical spread
-const ACID = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | REACT_NEIGHBOURS | DESTRUCTIBLE << REACT1 | DESTRUCTIBLE << REACT2 | REACT_AS << CHEMICAL;
-const MAGMA = MEDIUM_DENSITY | GRAVITY | FLUID | MEDIUM_SPREAD | REACT_NEIGHBOURS | (FLAMMABLE << REACT1) | (FIRE_PLACE << PRODUCT1_SHIFT) | (WATERING << REACT2) | (STONE_PLACE << PRODUCT2_SHIFT);
+const ACID = MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | REACT_NEIGHBOURS | DESTRUCTIBLE << REACT1 | DESTRUCTIBLE << REACT2 | (EMPTY_PLACE << PRODUCT1_SHIFT) | (EMPTY_PLACE << PRODUCT2_SHIFT) | (REACT_AS << CHEMICAL);
+const MAGMA = MEDIUM_DENSITY | GRAVITY | FLUID | MEDIUM_SPREAD | REACT_NEIGHBOURS | (FLAMMABLE << REACT1) | (FIRE_PLACE << PRODUCT1_SHIFT) | (WATERING << REACT2) | (BLOCK_PLACE << PRODUCT2_SHIFT);
 const ICE = HIGH_DENSITY | (REACT_AS << DESTRUCTIBLE) | REACT_NEIGHBOURS | (WATERING << REACT1) | (ICE_PLACE << PRODUCT1_SHIFT);
 // const RAINBOW1 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW2_PLACE << PRODUCT2_SHIFT);
 // const RAINBOW2 = LOW_DENSITY | GRAVITY | SLOW | LOW_SPREAD | VOLATILE | (RAINBOW1_PLACE << PRODUCT2_SHIFT);
@@ -146,6 +152,8 @@ field = new Uint32Array(SIZE); // the main field holding all information
 field.fill(EMPTY);
 
 particleTypes = [EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, ICE, // placable
+    WOOD, TREE, MUD, GAS, STONE, LEAF,
+    EMPTY, DUST, WATER, FIRE, SEED, BLOCK, ACID, OIL, MAGMA, ICE, // placable
     WOOD, TREE, MUD, GAS, STONE, LEAF]; // not placable
 
 // doing this calcualtion each step was terrible for performance
@@ -234,7 +242,7 @@ setInterval(e => {
             pixel32Array[pos] |= pixelColours[flags|UPDATE_BIT];
             
             if (flags & VOLATILE && Math.random() < .1){
-                flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15 | 16]^evenLoop;
             }
             
             if (flags & REACT_NEIGHBOURS){
@@ -243,18 +251,18 @@ setInterval(e => {
                 
                 // this is not the same newPos as later, but reusing variables saves 20 bytes when crushed
                 newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup2){
-                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15 | 16]^evenLoop;
+                }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15 | 16]^evenLoop;
                 }
                 newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup2){
-                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15 | 16]^evenLoop;
+                }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15 | 16]^evenLoop;
                 }
             }
             
@@ -276,11 +284,11 @@ setInterval(e => {
             
             // react with newPos
             if (!(flags & REACT_NEIGHBOURS)){
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15]^evenLoop;
-                }
                 if (field[newPos] & reactGroup2){
-                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15]^evenLoop;
+                    flags = particleTypes[(flags>>PRODUCT2_SHIFT) & 15 | 16]^evenLoop;
+                }
+                if (field[newPos] & reactGroup1){
+                    field[newPos] = particleTypes[(flags>>PRODUCT1_SHIFT) & 15 | 16]^evenLoop;
                 }
             }
             
