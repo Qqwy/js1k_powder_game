@@ -71,7 +71,7 @@ const HIGH_DENSITY = 192;
 
 
 const REACT_NEIGHBOURS = 1<<15; //REACT_ABOVE | REACT_SIDE | REACT_BELOW;
-
+const REACT_ABOVE = 1<<30
 
 
 /* Each element can have 2 reactions in which it plays as an actor
@@ -112,13 +112,16 @@ const REACTING2 = (1<<(PRODUCT2_SHIFT)) - (1<<REACTING2_SHIFT);
 const NUM_PLACABLE_TYPES = 12;
 
 const PLACABLE_BEGIN = 0;
-const NON_PLACABLE_BEGIN = 7//NUM_PLACABLE_TYPES;
+const PRODUCT_BEGIN = 7//NUM_PLACABLE_TYPES;
 
-const WATER_PLACE = 0;
-const FIRE_PLACE = 1;
-const STONE_PLACE = 2;
-const ICE_PLACE = 3;
-const EMPTY_PLACE = 4;
+
+// PRODUCT_BEGIN is added to this
+const EMPTY_PLACE = 0;
+const WATER_PLACE = 1;
+const FIRE_PLACE = 2;
+const STONE_PLACE = 3;
+const ICE_PLACE = 4;
+
 const WOOD_PLACE = 5;
 const TREE_PLACE = 6;
 const MUD_PLACE = 7;
@@ -144,7 +147,7 @@ const GAS = UPDATE_BIT | LOW_DENSITY | FLY | HIGH_SPREAD | REACT_AS << FLAMMABLE
 const SEED = UPDATE_BIT | HIGH_DENSITY | GRAVITY | LOW_SPREAD | REACT_AS << FLAMMABLE | REACT_NEIGHBOURS | SOIL << REACT2 | TREE_PLACE << PRODUCT2_SHIFT | REACT_AS << DESTRUCTIBLE;
 const TREE = UPDATE_BIT | HIGH_DENSITY | FLY | LOW_SPREAD | REACT_AS << DESTRUCTIBLE | VOLATILE | PERFORABLE << REACT1 | WOOD_PLACE << PRODUCT1_SHIFT | EMPTY_PLACE << PRODUCT2_SHIFT;
 const WOOD = UPDATE_BIT | HIGH_DENSITY | REACT_AS << FLAMMABLE | REACT_AS << DESTRUCTIBLE | REACT_NEIGHBOURS | PERFORABLE << REACT2 | LEAF_PLACE << PRODUCT2_SHIFT | CHEMICAL << REACT1 | VIRUS_PLACE << PRODUCT1_SHIFT;
-const LEAF = UPDATE_BIT | HIGH_DENSITY | REACT_NEIGHBOURS | REACT_AS << FLAMMABLE | WATERING << REACT2 | TREE_PLACE << PRODUCT2_SHIFT | REACT_AS << DESTRUCTIBLE;
+const LEAF = UPDATE_BIT | HIGH_DENSITY | REACT_NEIGHBOURS | REACT_ABOVE | REACT_AS << FLAMMABLE | WATERING << REACT2 | TREE_PLACE << PRODUCT2_SHIFT | REACT_AS << DESTRUCTIBLE;
 const STONE = UPDATE_BIT | HIGH_DENSITY | GRAVITY | SLOW | REACT_AS << DESTRUCTIBLE; // slow is set to have at least some vertical spread
 const ACID = UPDATE_BIT | MEDIUM_DENSITY | GRAVITY | FLUID | HIGH_SPREAD | REACT_NEIGHBOURS | REACT_AS << CHEMICAL | DESTRUCTIBLE << REACT1 | EMPTY_PLACE << PRODUCT1_SHIFT | DESTRUCTIBLE << REACT2 | EMPTY_PLACE << PRODUCT2_SHIFT;
 const MAGMA = UPDATE_BIT | MEDIUM_DENSITY | GRAVITY | FLUID | MEDIUM_SPREAD | REACT_NEIGHBOURS | REACT_AS << HOT | FLAMMABLE << REACT1 | FIRE_PLACE << PRODUCT1_SHIFT | WATERING << REACT2 | STONE_PLACE << PRODUCT2_SHIFT;
@@ -157,22 +160,24 @@ const EXPLOSION = UPDATE_BIT | HIGH_DENSITY | GRAVITY | HIGH_SPREAD | REACT_NEIG
 const HYDROGEN = UPDATE_BIT | LOW_DENSITY | HIGH_SPREAD | FLY | REACT_NEIGHBOURS | HOT << REACT1 | EXPLOSION_PLACE << PRODUCT1_SHIFT | HOT << REACT2 | EXPLOSION_PLACE << PRODUCT2_SHIFT;
 const THUNDER = UPDATE_BIT | LOW_DENSITY | GRAVITY | MEDIUM_SPREAD | REACT_NEIGHBOURS | VOLATILE | REACT_AS << CHEMICAL | FLAMMABLE << REACT1 | EXPLOSION_PLACE << PRODUCT1_SHIFT | EMPTY_PLACE << PRODUCT2_SHIFT;
 
-// declaring variables as local allows closure to simplify the names
-// remove these declarations after closure compiling
-// var flags, pos, object, newPos, imgdata, update, md, mx, my, i, j, colour, reactGroup1, reactGroup2, imgData;
-// currentType = 0;
-evenLoop = currentType = md = mx = my = 0;
+// it is possible to leave out mx and my
+// js will give an error when you try to place something without moving the mouse, but that won't be noticable
+// nothing is on the screen anyways
+md = mx = my = evenLoop = currentType = 0;
 
 field = new Uint32Array(SIZE); // the main field holding all information
 field.fill(EMPTY);
 
-// placableTypes = [DUST, WATER, FIRE, STONE, ICE, SEED, BLOCK, ACID, OIL, MAGMA, EMPTY];
-// productTypes = [EMPTY, WATER, FIRE, STONE, ICE, WOOD, TREE, MUD, GAS, LEAF, RAINBOW1, RAINBOW2, RAINBOW3, VIRUS];
-particleTypes = [DUST, SEED, BLOCK, ACID, OIL, MAGMA, THUNDER, WATER, FIRE, STONE, ICE, EMPTY, WOOD, TREE, MUD, GAS, LEAF, RAINBOW1, RAINBOW2, RAINBOW3, VIRUS, EXPLOSION, HYDROGEN];
+particleTypes = [
+    DUST, SEED, BLOCK, ACID, OIL, MAGMA, THUNDER, // only placable
+    EMPTY, WATER, FIRE, STONE, ICE, // placable and product
+    WOOD, TREE, MUD, GAS, LEAF, RAINBOW1, RAINBOW2, RAINBOW3, VIRUS, EXPLOSION, HYDROGEN // product only
+];
 // colours = [0x88aabb, 0x77aa77, 0x777777, 0xffff, 0x333377, 0x33ff, 0x0, 0xff7700, 0xdd, 0xaaaaaa, 0xffff77, 0x7777, 0x9900, 0x557799, 0x7700, 0x9900, 0xff00ff, 0xffff00, 0xffff, 0xff00aa];
 
 // each 3 letters are the colour for one of the particles
-colours = "ba87a7777df0733f30ff707fd00aaa7ff000730090975070090f0f0ffff0a0ffa7105"
+// the order is the same as in the list
+colours = "ba87a7777df0733f30ff700007fd00aaa7ff730090975070090f0f0ffff0a0ffa7105"
 
 pixelColours = {};
 // BBGGRR
@@ -244,30 +249,43 @@ setInterval(e => {
             pixel32Array[pos] |= pixelColours[flags|UPDATE_BIT];
             
             if (flags & VOLATILE && Math.random() < .1){
-                flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
+                flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
             }
             
             if (flags & REACT_NEIGHBOURS){
-                // select 2 random neighbouring positions and react with them
-                // first half of this block should be exactly the same as 2nd half
-                
-                // this is not the same newPos as later, but reusing variables saves 20 bytes when crushed
-                newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup2){
-                    flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
-                }
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
-                }
-                
-//                 reactGroup1 = flags & REACTING1 && (1 << REAGENT_SHIFT) << ((flags >> REACTING1_SHIFT) & 7);
-//                 reactGroup2 = flags & REACTING2 && (1 << REAGENT_SHIFT) << ((flags >> REACTING2_SHIFT) & 7);
-                newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
-                if (field[newPos] & reactGroup2){
-                    flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
-                }
-                if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
+                if (flags & REACT_ABOVE){
+                    newPos = pos - WIDTH;
+                    if (field[newPos] & reactGroup2){
+                        flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
+                    }
+                    if (field[newPos] & reactGroup1){
+                        field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
+                    }
+                } else {
+                    // select 2 random neighbouring positions and react with them
+                    // first half of this block should be exactly the same as 2nd half
+                    
+                    // this is not the same newPos as later, but reusing variables saves 20 bytes when crushed
+                    newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
+                    if (field[newPos] & reactGroup2){
+                        flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
+                    }
+                    if (field[newPos] & reactGroup1){
+                        field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
+                    }
+                    
+                    // without re-checking, the reaction for a product might happen again immedeately,
+                    // even though the conditions for this reaction are not valid
+//                     reactGroup1 = flags & REACTING1 && (1 << REAGENT_SHIFT) << ((flags >> REACTING1_SHIFT) & 7);
+                    reactGroup2 = flags & REACTING2 && (1 << REAGENT_SHIFT) << ((flags >> REACTING2_SHIFT) & 7);
+                    
+                    newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
+                    if (field[newPos] & reactGroup2){
+                        flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
+                    }
+                    if (field[newPos] & reactGroup1){
+                        field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
+                    }
                 }
             }
             
@@ -289,10 +307,10 @@ setInterval(e => {
             // react with newPos
             if (!(flags & REACT_NEIGHBOURS)){
                 if (field[newPos] & reactGroup2){
-                    flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
+                    flags = particleTypes[((flags>>PRODUCT2_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
                 }
                 if (field[newPos] & reactGroup1){
-                    field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+NON_PLACABLE_BEGIN]^evenLoop;
+                    field[newPos] = particleTypes[((flags>>PRODUCT1_SHIFT) & 15)+PRODUCT_BEGIN]^evenLoop;
                 }
             }
             
