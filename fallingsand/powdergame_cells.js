@@ -116,12 +116,12 @@ const PRODUCT_BEGIN = 8//NUM_PLACABLE_TYPES;
 
 
 // PRODUCT_BEGIN is added to this
-const EMPTY_PLACE = 0;
-const WATER_PLACE = 1;
-const FIRE_PLACE = 2;
-const STONE_PLACE = 3;
-const ICE_PLACE = 4;
+const EMPTY_PLACE = 3;
+const WATER_PLACE = 0;
+const FIRE_PLACE = 1;
+const STONE_PLACE = 2;
 
+const ICE_PLACE = 4;
 const WOOD_PLACE = 5;
 const TREE_PLACE = 6;
 const MUD_PLACE = 7;
@@ -171,14 +171,14 @@ field.fill(EMPTY);
 
 particleTypes = [
     DUST, SEED, BLOCK, ACID, OIL, MAGMA, THUNDER, GUNPOWDER, // only placable
-    EMPTY, WATER, FIRE, STONE, ICE, // placable and product
-    WOOD, TREE, MUD, GAS, LEAF, RAINBOW1, RAINBOW2, RAINBOW3, VIRUS, EXPLOSION, HYDROGEN // product only
+    WATER, FIRE, STONE, EMPTY, // placable and product
+    ICE, WOOD, TREE, MUD, GAS, LEAF, RAINBOW1, RAINBOW2, RAINBOW3, VIRUS, EXPLOSION, HYDROGEN // product only
 ];
 // colours = [0x88aabb, 0x77aa77, 0x777777, 0xffff, 0x333377, 0x33ff, 0x0, 0xff7700, 0xdd, 0xaaaaaa, 0xffff77, 0x7777, 0x9900, 0x557799, 0x7700, 0x9900, 0xff00ff, 0xffff00, 0xffff, 0xff00aa];
 
 // each 3 letters are the colour for one of the particles
 // the order is the same as in the list
-colours = "ba87a7777df0733f30ff744400007fd00aaa7ff730090975070090f0f0ffff0a0ffa7105"
+colours = "ba87a7777df0733f30ff744407fd00aaa0007ff730090975070090f0f0ffff0a0ffa7105"
 
 pixelColours = {};
 // BBGGRR
