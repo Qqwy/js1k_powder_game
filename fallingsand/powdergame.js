@@ -1,6 +1,6 @@
 
-const WIDTH = 500;
-const HEIGHT = 400;
+const WIDTH = 200;
+const HEIGHT = 200;
 const OBJECTS = 10000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 30; // 1000/FPS
@@ -83,4 +83,4 @@ setInterval(_=>{
 },DELAY);
 
 // when the mouse is pressed, create 20 objects under the cursor
-onmousedown = e => {for (i=20; i--;)objects.push([SAND, e.offsetX+e.offsetY*WIDTH])}
+onmousedown = e => {for (i=200; i--;)objects.push([SAND, e.offsetX+i+e.offsetY*WIDTH])};
