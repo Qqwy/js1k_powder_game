@@ -38,7 +38,7 @@ var flags,
 
 
 const WIDTH = 800;
-const HEIGHT = 500;
+const HEIGHT = 450;
 // const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
