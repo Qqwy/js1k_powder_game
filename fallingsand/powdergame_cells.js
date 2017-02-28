@@ -38,7 +38,7 @@ var flags,
 
 
 const WIDTH = 800;
-const HEIGHT = 450;
+const HEIGHT = 500;
 // const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
@@ -192,9 +192,9 @@ pixel32Array = new Uint32Array(drawData)
 imgDataArray = new Uint8ClampedArray(drawData);
 
 
-onmousedown = e => md=1;// without brackets closure would add a return statement
+a.onmousedown = e => md=1;
 onmouseup   = e => md=0;
-onmousemove = e => {mx = e.offsetX; my = e.offsetY};
+a.onmousemove = e => {mx = e.offsetX; my = e.offsetY};
 
 
 
