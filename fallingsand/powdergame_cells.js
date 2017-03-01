@@ -1,6 +1,10 @@
 
 
 /*
+ * Authors: Michiel de Jong and Wiebe-Marten Wijnja
+ *
+ * The most up-to-date version of the source can be found at https://github.com/Qqwy/js1k_powder_game
+ *
  * This code is made to be first compiled by the google closure compiler,
  * Then edited by this replacing code:
  * var arg = code.match(/function\((\w+)\)/)[1]; result = code.replace(/function\(\w*\)/g,arg+"=>").replace(/\{return ([^\}]*)\}/g,"$1").replace(/\b(\d{4,})/g, (_, intStr) => '0x'+Number.parseInt(intStr).toString(16))
@@ -192,9 +196,9 @@ pixel32Array = new Uint32Array(drawData)
 imgDataArray = new Uint8ClampedArray(drawData);
 
 
-onmousedown = e => md=1;// without brackets closure would add a return statement
+a.onmousedown = e => md=1;
 onmouseup   = e => md=0;
-onmousemove = e => {mx = e.offsetX; my = e.offsetY};
+a.onmousemove = e => {mx = e.offsetX; my = e.offsetY};
 
 
 
