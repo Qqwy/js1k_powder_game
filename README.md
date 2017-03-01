@@ -12,6 +12,10 @@ Authors: Michiel de Jong (jmdejong) and Wiebe-Marten Wijnja (Qqwy).
 This repository houses the unminified code, feature tests and other stuff we worked with during the creation of this demo. 
 _(Don't worry; The repository will be cleaned up a little bit during the coming next few days...)_
 
+The final version of the code that has been submitted, is [fallingsand/powdergame_cells.js](https://github.com/Qqwy/js1k_powder_game/blob/master/fallingsand/powdergame_cells.js).
+
+To make sure that this (14.9kb-sized) file fits in 1024 bytes, we compressed it using the Closure Compiler, followed by a few manually crafted find-and-replace procedures to use ES6 fat-arrow lambdas and hexadecimal numeric constants, further compressing the size. And then, this was compressed using RegPack to squeeze out the final bits.
+
 # Description
 
 Use your mouse to place elements (and the scrollwheel to change the selected element).
