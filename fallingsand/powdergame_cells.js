@@ -1,6 +1,10 @@
 
 
 /*
+ * Authors: Michiel de Jong and Wiebe-Marten Wijnja
+ *
+ * The most up-to-date version of the source can be found at https://github.com/Qqwy/js1k_powder_game
+ *
  * This code is made to be first compiled by the google closure compiler,
  * Then edited by this replacing code:
  * var arg = code.match(/function\((\w+)\)/)[1]; result = code.replace(/function\(\w*\)/g,arg+"=>").replace(/\{return ([^\}]*)\}/g,"$1").replace(/\b(\d{4,})/g, (_, intStr) => '0x'+Number.parseInt(intStr).toString(16))
