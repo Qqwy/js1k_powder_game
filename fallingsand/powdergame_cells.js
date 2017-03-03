@@ -43,7 +43,6 @@ var flags,
 
 const WIDTH = 800;
 const HEIGHT = 450;
-// const OBJECTS = 100000;
 const SIZE = WIDTH * HEIGHT;
 const DELAY = 16; // 1000/FPS
 
@@ -74,7 +73,7 @@ const MEDIUM_DENSITY = 128;
 const HIGH_DENSITY = 192;
 
 
-const REACT_NEIGHBOURS = 1<<15; //REACT_ABOVE | REACT_SIDE | REACT_BELOW;
+const REACT_NEIGHBOURS = 1<<15;
 const REACT_ABOVE = 1<<30
 
 
@@ -116,7 +115,7 @@ const REACTING2 = (1<<(PRODUCT2_SHIFT)) - (1<<REACTING2_SHIFT);
 const NUM_PLACABLE_TYPES = 12;
 
 const PLACABLE_BEGIN = 0;
-const PRODUCT_BEGIN = 8//NUM_PLACABLE_TYPES;
+const PRODUCT_BEGIN = 8
 
 
 // PRODUCT_BEGIN is added to this
@@ -178,14 +177,13 @@ particleTypes = [
     WATER, FIRE, STONE, EMPTY, // placable and product
     ICE, WOOD, TREE, MUD, GAS, LEAF, RAINBOW1, RAINBOW2, RAINBOW3, VIRUS, EXPLOSION, HYDROGEN // product only
 ];
-// colours = [0x88aabb, 0x77aa77, 0x777777, 0xffff, 0x333377, 0x33ff, 0x0, 0xff7700, 0xdd, 0xaaaaaa, 0xffff77, 0x7777, 0x9900, 0x557799, 0x7700, 0x9900, 0xff00ff, 0xffff00, 0xffff, 0xff00aa];
 
 // each 3 letters are the colour for one of the particles
 // the order is the same as in the list
+// rgbrgbrgbrgb...
 colours = "ba87a7777df0733f30ff744407fd00aaa0007ff730090975070090f0f0ffff0a0ffa7105"
 
 pixelColours = {};
-// BBGGRR
 for (i in colours){
     pixelColours[particleTypes[i/3|0]] |= ('0x'+colours[i]+colours[i] | 0) << 8 * (i%3);
 }
@@ -207,16 +205,8 @@ a.onmousemove = e => {mx = e.offsetX; my = e.offsetY};
 // letter keys work as well in the same order
 // other keys might work as well
 onwheel = e => currentType += e.deltaY > 0 || NUM_PLACABLE_TYPES - 1
-// onkeydown = e => {currentType = e.which % 16}
 
-// var startTime = Date.now();
-// var totalSteps = 0;
-// var updateEnd = Date.now();
-
-//update = e => {
 setInterval(e => {
-    
-//     var updateStart = Date.now();
     
     // set the alpha here so it doesn't need to be in the colours
     pixel32Array.fill(0xff000000);
@@ -281,7 +271,6 @@ setInterval(e => {
                     
                     // without re-checking, the reaction for a product might happen again immedeately,
                     // even though the conditions for this reaction are not valid
-//                     reactGroup1 = flags & REACTING1 && (1 << REAGENT_SHIFT) << ((flags >> REACTING1_SHIFT) & 7);
                     reactGroup2 = flags & REACTING2 && (1 << REAGENT_SHIFT) << ((flags >> REACTING2_SHIFT) & 7);
                     
                     newPos = pos+[1, -1, WIDTH, -WIDTH][Math.random()*4|0];
@@ -328,12 +317,4 @@ setInterval(e => {
     c.putImageData(new ImageData(imgDataArray, WIDTH, HEIGHT),0,0);
     
     
-    
-    
-//     console.log((Date.now()-updateEnd));/*/-startTime)/++totalSteps);/**/
-//     updateEnd = Date.now();
-    
-//     requestAnimationFrame(update);
 },DELAY);
-
-// update();
